@@ -225,6 +225,18 @@
       </div>
     </div>
   </div>
+
+  <!-- 대표님 전용 (답변 수정) -->
+  <div id="viewCeo" class="hidden">
+    <div class="card" id="ceoGate">
+      <div class="q-full">대표님 전용 페이지</div>
+      <div class="hint">답변을 직접 수정할 수 있습니다. 수정 내용은 저장 즉시 모든 화면(학우 참여·모두의 답·발표 화면)에 반영됩니다.</div>
+      <input type="text" id="ceoPw" placeholder="비밀번호">
+      <div style="height:12px"></div>
+      <button class="btn" onclick="ceoLogin()">입장</button>
+    </div>
+    <div id="ceoBody" class="hidden"></div>
+  </div>
 </div>
 
 <!-- 발표 모드 (프로젝터) -->
@@ -249,7 +261,8 @@
 <script>
 /* ================= 설정 ================= */
 var PAGE = 'live';   // 이 파일의 역할: live=포럼 참여 / board=모두의 답 / admin=진행자
-var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html' };
+var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html', ceo:'forum202608_ceo.html' };
+var CEO_PW = 'ceo2026';        // ← 대표님 전용 페이지 비밀번호
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuuhoVY27FU-i-8yRI8UB2OuFzPoteRJ5kU0B_htmYl4bQbv76yJfmpc7Pry-_LdQTOQ/exec';
 var ADMIN_PW   = 'edu2026';     // ← 진행자(학장) 비밀번호
 var COHORTS = ['1기','2기','3기','운영팀'];
@@ -306,6 +319,7 @@ var me = {cohort:'', name:''};
 var myAnswers = {};      // qid -> {text, score}
 var allAnswers = {};     // qid -> [{cohort,name,text,score,ts}]
 var reveals = {};        // qid -> true/false, 'ALL' -> true/false
+var ceoEdits = {};       // qid -> {text, score} — 대표님이 직접 수정한 답변 (내장 답변보다 우선)
 var demoRows = [];       // 데모 모드 저장소
 var curQ = null, curScore = null, isAdmin = false;
 var currentQid = null;   // 진행자가 브로드캐스트한 현재 문항
@@ -340,6 +354,7 @@ function rebuild(rows){
   rows.forEach(function(r){
     if(r.type==='reveal'){ reveals[r.qid] = (r.text==='on'); return; }
     if(r.type==='current'){ currentQid = r.qid==='' ? null : Number(r.qid); return; }
+    if(r.type==='ceoedit'){ ceoEdits[r.qid] = {text:r.text, score:r.score}; return; }
     if(r.type!=='answer') return;
     latest[r.cohort+'|'+r.name+'|'+r.qid] = r;
   });
@@ -483,13 +498,13 @@ function renderBoard(){
   if(q.badge==='ceo'){
     html = '<div class="card">'+ceoCardHtml(q,false)+'</div>';
   } else if(!myAnswers[q.id]){
-    html = '<div class="card"><div class="empty">🔒 나의 답변을 저장하면, 이 질문의 실시간 보드(학우들의 답'+(q.ceo?' + 대표님의 답':'')+')가 열립니다.</div></div>';
+    html = '<div class="card"><div class="empty">🔒 나의 답변을 저장하면, 이 질문의 실시간 보드(학우들의 답'+(ceoOf(q)?' + 대표님의 답':'')+')가 열립니다.</div></div>';
   } else {
     var cnt = (allAnswers[q.id]||[]).length;
     html = '<div class="card"><div class="board-title">📡 실시간 답변 보드</div>';
-    html += ceoCardHtml(q,false);
-    html += '<div style="font-size:12.5px;font-weight:700;color:var(--sub);margin:10px 0 2px">학우 답변 '+cnt+'개</div>';
+    html += '<div style="font-size:12.5px;font-weight:700;color:var(--sub);margin:6px 0 2px">학우 답변 '+cnt+'개</div>';
     html += answersHtml(q,false);
+    html += ceoCardHtml(q,false);
     html += '</div>';
   }
   $('dBoard').innerHTML = html;
@@ -522,12 +537,21 @@ function saveAnswer(){
 }
 
 /* ================= 모두의 답 ================= */
+/* 대표님의 유효 답변: 직접 수정본(ceoEdits)이 있으면 우선, 없으면 내장 답변 */
+function ceoOf(q){
+  var e = ceoEdits[q.id];
+  var t = (e && e.text) ? e.text : q.ceo;
+  if(!t) return null;
+  var s = (e && e.score!=='' && e.score!=null) ? Number(e.score) : (q.ceoScore!=null ? q.ceoScore : null);
+  return {text:t, score:s};
+}
 function ceoCardHtml(q, forceOpen){
-  if(!q.ceo) return '';
+  var c = ceoOf(q);
+  if(!c) return '';
   var open = forceOpen || isRevealed(q.id);
   if(open){
-    var scoreChip = (q.ceoScore!=null)?'<span class="score-chip">'+q.ceoScore+'점</span>':'';
-    return '<div class="ceo-card"><div class="head">🎤 고승재 대표님의 답변</div><div class="body">'+scoreChip+esc(q.ceo)+'</div></div>';
+    var scoreChip = (c.score!=null)?'<span class="score-chip">'+c.score+'점</span>':'';
+    return '<div class="ceo-card"><div class="head">🎤 고승재 대표님의 답변</div><div class="body">'+scoreChip+esc(c.text)+'</div></div>';
   }
   return '<div class="ceo-card locked"><div class="head">🔒 고승재 대표님의 답변</div><div class="body">포럼 현장에서 인터뷰 진행에 맞춰 공개됩니다.</div></div>';
 }
@@ -563,12 +587,12 @@ function renderBrowse(){
   QUESTIONS.forEach(function(q){
     if(q.sec!==lastSec){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; lastSec=q.sec; }
     html += '<div class="card"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
-    html += ceoCardHtml(q, false);
     if(q.badge!=='ceo'){
       var cnt = (allAnswers[q.id]||[]).length;
       html += '<div style="font-size:12.5px;font-weight:700;color:var(--sub);margin:10px 0 2px">학우 답변 '+cnt+'개</div>';
       html += answersHtml(q, false);
     }
+    html += ceoCardHtml(q, false);
     html += '</div>';
   });
   $('browseList').innerHTML = html;
@@ -586,7 +610,7 @@ function renderAdmin(){
   $('tglAll').classList.toggle('on', reveals['ALL']===true);
   var html='';
   QUESTIONS.forEach(function(q){
-    if(!q.ceo) return;
+    if(!ceoOf(q)) return;
     html += '<div class="adm-row"><span class="no" style="font-weight:800;color:var(--navy)">Q'+q.id+'</span><div class="qt">'+esc(q.q.length>40?q.q.slice(0,40)+'…':q.q)+'</div><div class="toggle'+(isRevealed(q.id)?' on':'')+'" onclick="toggleReveal('+q.id+')"></div></div>';
   });
   $('admToggles').innerHTML = html;
@@ -612,6 +636,58 @@ function toggleReveal(qid){
   apiPost({type:'reveal', cohort:'', name:me.name, qid:qid, text:cur?'off':'on', score:''}, function(){
     refresh(renderAdmin);
     toast(qid==='ALL' ? (cur?'전체 숨김':'전체 공개') : 'Q'+qid+' '+(cur?'숨김':'공개'));
+  });
+}
+
+/* ================= 대표님 전용 (답변 수정) ================= */
+var isCeo = false;
+function ceoLogin(){
+  if($('ceoPw').value !== CEO_PW){ toast('비밀번호가 올바르지 않습니다'); return; }
+  isCeo = true;
+  $('ceoGate').classList.add('hidden');
+  refresh(renderCeo);
+}
+function renderCeo(){
+  $('ceoBody').classList.remove('hidden');
+  var html = '<div class="note">질문별로 답변을 수정하고 저장하면, 즉시 모든 화면(학우 참여·모두의 답·발표 화면)에 반영됩니다. 아직 공개 전인 답변은 학우들에게 보이지 않으며, 포럼 진행에 맞춰 공개됩니다.</div>';
+  var last = '';
+  QUESTIONS.forEach(function(q){
+    if(q.sec !== last){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; last = q.sec; }
+    var c = ceoOf(q);
+    var status = c ? (isRevealed(q.id) ? '<span class="badge b-both">공개됨</span>' : '<span class="badge b-ceo">공개 전</span>')
+                   : '<span class="badge b-ceo">답변 없음 — 작성하면 공개 대상에 추가됩니다</span>';
+    html += '<div class="card"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
+    html += '<div style="margin:4px 0 8px">'+status+'</div>';
+    if(q.special === 'score'){
+      var sc = c && c.score!=null ? c.score : null;
+      html += '<div class="score-grid" id="ceoG'+q.id+'" data-score="'+(sc==null?'':sc)+'">';
+      for(var i=0;i<=10;i++){ html += '<button class="score-btn'+(sc===i?' sel':'')+'" onclick="pickCeoScore(this,'+i+')">'+i+'</button>'; }
+      html += '</div>';
+    }
+    html += '<textarea id="ceoT'+q.id+'" placeholder="대표님 답변을 입력해 주세요">'+(c?esc(c.text):'')+'</textarea>';
+    html += '<div style="height:10px"></div><button class="btn" onclick="saveCeo('+q.id+')">저장하기</button></div>';
+  });
+  $('ceoBody').innerHTML = html;
+}
+function pickCeoScore(btn, i){
+  var g = btn.parentElement;
+  g.querySelectorAll('.score-btn').forEach(function(b){ b.classList.remove('sel'); });
+  btn.classList.add('sel');
+  g.dataset.score = i;
+}
+function saveCeo(id){
+  var q = QUESTIONS.find(function(x){ return x.id===id; });
+  var t = $('ceoT'+id).value.trim();
+  if(!t){ toast('내용을 입력해 주세요'); return; }
+  var s = '';
+  if(q.special === 'score'){
+    var g = $('ceoG'+id);
+    if(g.dataset.score === ''){ toast('점수를 선택해 주세요'); return; }
+    s = Number(g.dataset.score);
+  }
+  apiPost({type:'ceoedit', cohort:'', name:'대표님', qid:id, text:t, score:s}, function(){
+    ceoEdits[id] = {text:t, score:s};
+    toast('Q'+id+' 저장되었습니다 ✅ 모든 화면에 반영됩니다');
   });
 }
 
@@ -655,7 +731,7 @@ function pMove(d){
 }
 function pMaxStage(q){
   if(q.badge === 'ceo') return 1;      // 질문 → 대표님 답변
-  return q.ceo ? 2 : 1;                // 질문 → 학우 답변 (→ 대표님 답변)
+  return ceoOf(q) ? 2 : 1;             // 질문 → 학우 답변 (→ 대표님 답변)
 }
 function pStage(){
   var s = pSlides[pIdx];
@@ -664,7 +740,7 @@ function pStage(){
   if(pStageN >= max){ pMove(1); return; }
   pStageN++;
   var ceoNow = (s.q.badge === 'ceo' && pStageN >= 1) || pStageN >= 2;
-  if(ceoNow && s.q.ceo && !isRevealed(s.q.id)){
+  if(ceoNow && ceoOf(s.q) && !isRevealed(s.q.id)){
     reveals[s.q.id] = true;  // 즉시 반영 + 시트 기록 → 학우 폰에도 공개
     apiPost({type:'reveal', cohort:'', name:me.name, qid:s.q.id, text:'on', score:''});
   }
@@ -691,9 +767,10 @@ function pAnswersHtml(q){
   return html;
 }
 function pCeoHtml(q){
-  if(!q.ceo) return '';
-  var chip = (q.ceoScore != null) ? '<span class="score-chip">' + q.ceoScore + '점</span> ' : '';
-  return '<div class="p-ceo"><div class="h">🎤 고승재 대표님의 답변</div><div class="b">' + chip + esc(q.ceo) + '</div></div>';
+  var c = ceoOf(q);
+  if(!c) return '';
+  var chip = (c.score != null) ? '<span class="score-chip">' + c.score + '점</span> ' : '';
+  return '<div class="p-ceo"><div class="h">🎤 고승재 대표님의 답변</div><div class="b">' + chip + esc(c.text) + '</div></div>';
 }
 function renderSlide(keepScroll){
   var s = pSlides[pIdx];
@@ -725,9 +802,11 @@ function renderSlide(keepScroll){
     var showCeo = (q.badge === 'ceo' && pStageN >= 1) || pStageN >= 2;
     var html = '<div class="p-sec">' + esc(SECTIONS[q.sec]) + '</div>';
     html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.q) + '</div>';
-    if(showCeo) html += pCeoHtml(q);
     if(showAns) html += pAnswersHtml(q);
+    if(showCeo) html += pCeoHtml(q);
     body.innerHTML = html;
+    // 대표님 답변이 마지막에 공개되므로, 공개 순간 해당 카드가 보이도록 스크롤
+    if(showCeo && !keepScroll){ var pc = body.querySelector('.p-ceo'); if(pc) pc.scrollIntoView({block:'end'}); return; }
     if(pStageN >= max){ st.textContent = '다음 질문 →'; }
     else if(q.badge === 'ceo' || pStageN >= 1){ st.textContent = '🎤 대표님 답변 공개'; }
     else { st.textContent = '학우 답변 보기'; }
@@ -743,6 +822,13 @@ function renderSlide(keepScroll){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.page===PAGE); });
   var saved = lsGet('esq_me'), m = null;
   if(saved){ try{ m = JSON.parse(saved); }catch(e){} }
+  if(PAGE === 'ceo'){
+    // 대표님 전용 페이지: 로그인 생략, 비밀번호 게이트
+    me = {cohort:'', name:'대표님'};
+    $('viewLogin').classList.add('hidden');
+    $('viewCeo').classList.remove('hidden');
+    return;  // 자동 폴링 없음 — 입력 중 내용 보호
+  }
   if(PAGE === 'admin'){
     // 진행자 페이지: 기수 로그인 생략, 바로 비밀번호 게이트
     me = (m && m.cohort && m.name) ? m : {cohort:'운영팀', name:'진행자'};
