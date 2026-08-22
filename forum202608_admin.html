@@ -738,6 +738,8 @@ function renderSlide(keepScroll){
 /* ================= 시작 ================= */
 (function init(){
   if(!SCRIPT_URL) $('demoBanner').classList.remove('hidden');
+  // 탭은 진행자 페이지에서만 표시 (학우 참여 페이지·모두의 답 페이지는 단일 화면)
+  $('tabs').classList.toggle('hidden', PAGE!=='admin');
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.page===PAGE); });
   var saved = lsGet('esq_me'), m = null;
   if(saved){ try{ m = JSON.parse(saved); }catch(e){} }
