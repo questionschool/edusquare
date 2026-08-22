@@ -25,7 +25,7 @@
   header h1 .lg-sq{color:#8FB8D8;font-weight:600}
   header .sub{font-size:12px;color:var(--sub);margin-top:4px}
   header .sub b{color:var(--mint)}
-  header .who{font-size:12px;margin-top:6px;background:rgba(62,231,149,.14);color:var(--mint);display:inline-block;padding:2px 10px;border-radius:12px;font-weight:700}
+  header .who{font-size:12px;margin-top:6px;background:rgba(62,231,149,.14);color:var(--mint);display:inline-block;padding:2px 10px;border-radius:12px;font-weight:700;cursor:pointer}
   .tabs{display:flex;background:rgba(9,22,37,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
   .tab{flex:1;text-align:center;padding:12px 4px;font-size:13.5px;font-weight:700;color:var(--sub);border-bottom:3px solid transparent;cursor:pointer;user-select:none}
   .tab.on{color:var(--mint);border-bottom-color:var(--mint)}
@@ -145,7 +145,7 @@
 <header>
   <h1><span class="lg-edu">EDU</span><span class="lg-sq">SQUARE</span> 경영포럼 2026</h1>
   <div class="sub">"AI 혁신의 시대, 리더는 무엇을 해야 하는가?" · 8/23(일)</div>
-  <div class="who hidden" id="whoChip"></div>
+  <div class="who hidden" id="whoChip" onclick="resetLogin()" title="탭하면 기수·이름을 다시 선택합니다"></div>
 </header>
 <div class="demo-banner hidden" id="demoBanner">⚠ 데모 모드 — 백엔드(SCRIPT_URL) 미설정, 답변이 이 기기에만 임시 저장됩니다</div>
 
@@ -401,6 +401,19 @@ function enterApp(){
     refresh(function(){ openQ((curQ&&curQ.id)||currentQid||QUESTIONS[0].id); });
   }
   startPoll();
+}
+/* 이름 칩 클릭 → 로그인 화면으로 (기수·이름 재선택) */
+function resetLogin(){
+  if(PAGE==='admin' || PAGE==='ceo') return;
+  try{ localStorage.removeItem('esq_me'); }catch(e){}
+  me = {cohort:'', name:''};
+  myAnswers = {}; curQ = null; savedText = '';
+  ['viewWrite','viewDetail','viewBrowse','viewAdmin','viewCeo'].forEach(function(id){ $(id).classList.add('hidden'); });
+  $('whoChip').classList.add('hidden');
+  $('nameInput').value = '';
+  renderCohorts();
+  $('viewLogin').classList.remove('hidden');
+  window.scrollTo(0,0);
 }
 /* 페이지 간 이동 */
 function nav(p){
