@@ -111,6 +111,9 @@
   #present .dist-avg{color:#C8D8EA;font-size:clamp(13px,1.4vw,17px)}
   .msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--navy-d);color:#fff;padding:10px 22px;border-radius:22px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;white-space:nowrap}
   .msg.show{opacity:1}
+  .sync-banner{background:var(--gold);color:#fff;border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:700;text-align:center;margin-bottom:10px;cursor:pointer;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.75}}
+  .board-title{font-weight:800;font-size:14px;color:var(--navy);margin-bottom:6px}
   .note{font-size:12.5px;color:var(--sub);background:var(--navy-bg);border-radius:10px;padding:10px 13px;margin-bottom:14px}
   .demo-banner{background:#FEF3C7;color:#92400E;font-size:12px;text-align:center;padding:6px}
   .hidden{display:none!important}
@@ -128,7 +131,7 @@
 <div class="demo-banner hidden" id="demoBanner">⚠ 데모 모드 — 백엔드(SCRIPT_URL) 미설정, 답변이 이 기기에만 임시 저장됩니다</div>
 
 <div class="tabs hidden" id="tabs">
-  <div class="tab on" data-view="write" onclick="switchTab('write')">✍ 작성하기</div>
+  <div class="tab on" data-view="write" onclick="switchTab('write')">▶ 포럼 참여</div>
   <div class="tab" data-view="browse" onclick="switchTab('browse')">👀 모두의 답</div>
   <div class="tab" data-view="admin" onclick="switchTab('admin')">⚙ 진행자</div>
 </div>
@@ -144,7 +147,7 @@
       <div style="height:14px"></div>
       <button class="btn" id="loginBtn" onclick="doLogin()">시작하기</button>
     </div>
-    <div class="note">사전 작성 안내 — 13개 질문에 각자의 생각을 자유롭게 적어 주세요. 제출 후에도 포럼 전까지 언제든 수정할 수 있습니다. ★ 표시 질문은 포럼 현장에서 대표님의 답변과 나란히 놓고 이야기합니다.</div>
+    <div class="note">참여 안내 — 포럼 진행에 맞춰 문항이 하나씩 진행됩니다. 각 질문에 나의 생각을 적어 저장하면, 그 질문의 실시간 답변 보드(학우들의 답 + 대표님의 답)가 열립니다. 진행자가 다음 질문으로 넘어가면 내 화면도 함께 이동합니다.</div>
   </div>
 
   <!-- 작성 목록 -->
@@ -153,8 +156,9 @@
     <div id="qList"></div>
   </div>
 
-  <!-- 작성 상세 -->
+  <!-- 문항 진행 (라이브) -->
   <div id="viewDetail" class="hidden">
+    <div id="syncBanner" class="sync-banner hidden" onclick="followNow()">▶ 지금 <b id="syncQLabel"></b> 진행 중 — 탭하여 이동</div>
     <div class="card">
       <div style="font-size:12px;font-weight:800;color:var(--sub);margin-bottom:6px" id="dSec"></div>
       <div class="q-full" id="dQ"></div>
@@ -173,6 +177,7 @@
         <button class="btn ghost" id="nextBtn" onclick="moveQ(1)">다음 →</button>
       </div>
     </div>
+    <div id="dBoard"></div>
   </div>
 
   <!-- 모두의 답 -->
@@ -286,6 +291,9 @@ var allAnswers = {};     // qid -> [{cohort,name,text,score,ts}]
 var reveals = {};        // qid -> true/false, 'ALL' -> true/false
 var demoRows = [];       // 데모 모드 저장소
 var curQ = null, curScore = null, isAdmin = false;
+var currentQid = null;   // 진행자가 브로드캐스트한 현재 문항
+var savedText = '';      // 현재 문항의 저장된 답 (dirty 판정용)
+var pollTimer = null;    // 참가자 자동 동기화 타이머
 
 /* ================= 유틸 ================= */
 function $(id){return document.getElementById(id);}
@@ -314,6 +322,7 @@ function rebuild(rows){
   var latest = {};
   rows.forEach(function(r){
     if(r.type==='reveal'){ reveals[r.qid] = (r.text==='on'); return; }
+    if(r.type==='current'){ currentQid = r.qid==='' ? null : Number(r.qid); return; }
     if(r.type!=='answer') return;
     latest[r.cohort+'|'+r.name+'|'+r.qid] = r;
   });
@@ -347,17 +356,55 @@ function enterApp(){
   $('whoChip').textContent = me.cohort+' · '+me.name;
   $('whoChip').classList.remove('hidden');
   refresh(function(){ switchTab('write'); });
+  startPoll();
 }
+
+/* ===== 실시간 동기화 (참가자) ===== */
+function isDirty(){
+  return $('dText').value.trim() !== (savedText||'');
+}
+function startPoll(){
+  if(pollTimer) return;
+  pollTimer = setInterval(function(){
+    refresh(function(){
+      var detailOn = !$('viewDetail').classList.contains('hidden');
+      if(detailOn && curQ){
+        // 진행자가 다른 문항으로 넘어갔고, 내가 입력 중이 아니면 자동 이동
+        if(currentQid && currentQid !== curQ.id && !isDirty()){
+          openQ(currentQid);
+          toast('▶ 진행에 맞춰 Q'+currentQid+'(으)로 이동했습니다');
+          return;
+        }
+        renderBoard();
+        updateSyncBanner();
+      }
+      if(!$('viewBrowse').classList.contains('hidden')) renderBrowse();
+      var admOn = !$('viewAdmin').classList.contains('hidden');
+      if(admOn && isAdmin && !document.getElementById('present').classList.contains('show')) renderAdmin();
+    });
+  }, 12000);
+}
+function updateSyncBanner(){
+  var show = currentQid && curQ && currentQid !== curQ.id;
+  $('syncBanner').classList.toggle('hidden', !show);
+  if(show) $('syncQLabel').textContent = 'Q'+currentQid;
+}
+function followNow(){ if(currentQid) openQ(currentQid); }
 
 /* ================= 탭 ================= */
 function switchTab(v){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.view===v); });
   ['viewWrite','viewDetail','viewBrowse','viewAdmin'].forEach(function(id){ $(id).classList.add('hidden'); });
-  if(v==='write'){ refresh(function(){ renderList(); $('viewWrite').classList.remove('hidden'); }); }
+  if(v==='write'){ refresh(function(){ openQ((curQ&&curQ.id)||currentQid||QUESTIONS[0].id); }); }
   if(v==='browse'){ refresh(function(){ renderBrowse(); $('viewBrowse').classList.remove('hidden'); }); }
   if(v==='admin'){ $('viewAdmin').classList.remove('hidden'); if(isAdmin){ refresh(renderAdmin); } }
 }
-function gotoList(){ switchTab('write'); }
+function gotoList(){
+  ['viewDetail','viewBrowse','viewAdmin'].forEach(function(id){ $(id).classList.add('hidden'); });
+  renderList();
+  $('viewWrite').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
 
 /* ================= 작성 목록 ================= */
 function badgeHtml(b){
@@ -381,15 +428,20 @@ function renderList(){
 /* ================= 작성 상세 ================= */
 function openQ(id){
   curQ = QUESTIONS.find(function(q){return q.id===id;});
+  if(!curQ) return;
   $('viewWrite').classList.add('hidden');
   $('viewDetail').classList.remove('hidden');
   $('dSec').textContent = SECTIONS[curQ.sec];
   $('dQ').textContent = 'Q'+curQ.id+'. '+curQ.q;
   $('dBadge').innerHTML = badgeHtml(curQ.badge);
-  $('dHint').textContent = curQ.hint||'';
+  var isCeoOnly = curQ.badge==='ceo';
+  $('dHint').textContent = isCeoOnly ? '대표님이 답하시는 질문입니다 — 인터뷰를 들으시고, 공개되면 아래에서 답변을 볼 수 있습니다.' : (curQ.hint||'');
+  $('dText').classList.toggle('hidden', isCeoOnly);
+  $('saveBtn').classList.toggle('hidden', isCeoOnly);
   var mine = myAnswers[curQ.id];
   $('dText').value = mine ? (mine.text||'') : '';
-  if(curQ.special==='score'){
+  savedText = mine ? (mine.text||'') : '';
+  if(!isCeoOnly && curQ.special==='score'){
     $('dScoreWrap').classList.remove('hidden');
     curScore = mine && mine.score!=='' && mine.score!=null ? Number(mine.score) : null;
     renderScore();
@@ -398,11 +450,31 @@ function openQ(id){
     $('dScoreWrap').classList.add('hidden'); curScore=null;
     $('dText').placeholder='여기에 생각을 적어 주세요';
   }
-  var idx = ANSWERABLE.indexOf(curQ);
+  var idx = QUESTIONS.indexOf(curQ);
   $('prevBtn').disabled = idx<=0;
-  $('nextBtn').disabled = idx>=ANSWERABLE.length-1;
+  $('nextBtn').disabled = idx>=QUESTIONS.length-1;
   $('saveBtn').textContent = mine ? '수정하여 저장하기' : '저장하기';
+  renderBoard();
+  updateSyncBanner();
   window.scrollTo(0,0);
+}
+/* 현재 문항의 실시간 답변 보드 */
+function renderBoard(){
+  if(!curQ){ $('dBoard').innerHTML=''; return; }
+  var q = curQ, html = '';
+  if(q.badge==='ceo'){
+    html = '<div class="card">'+ceoCardHtml(q,false)+'</div>';
+  } else if(!myAnswers[q.id]){
+    html = '<div class="card"><div class="empty">🔒 나의 답변을 저장하면, 이 질문의 실시간 보드(학우들의 답'+(q.ceo?' + 대표님의 답':'')+')가 열립니다.</div></div>';
+  } else {
+    var cnt = (allAnswers[q.id]||[]).length;
+    html = '<div class="card"><div class="board-title">📡 실시간 답변 보드</div>';
+    html += ceoCardHtml(q,false);
+    html += '<div style="font-size:12.5px;font-weight:700;color:var(--sub);margin:10px 0 2px">학우 답변 '+cnt+'개</div>';
+    html += answersHtml(q,false);
+    html += '</div>';
+  }
+  $('dBoard').innerHTML = html;
 }
 function renderScore(){
   var html='';
@@ -413,8 +485,8 @@ function renderScore(){
 }
 function pickScore(i){ curScore=i; renderScore(); }
 function moveQ(d){
-  var idx = ANSWERABLE.indexOf(curQ) + d;
-  if(idx>=0 && idx<ANSWERABLE.length) openQ(ANSWERABLE[idx].id);
+  var idx = QUESTIONS.indexOf(curQ) + d;
+  if(idx>=0 && idx<QUESTIONS.length) openQ(QUESTIONS[idx].id);
 }
 function saveAnswer(){
   var t = $('dText').value.trim();
@@ -423,11 +495,11 @@ function saveAnswer(){
   $('saveBtn').disabled = true;
   apiPost({type:'answer', cohort:me.cohort, name:me.name, qid:curQ.id, text:t, score:curQ.special==='score'?curScore:''}, function(){
     myAnswers[curQ.id] = {text:t, score:curQ.special==='score'?curScore:''};
+    savedText = t;
     $('saveBtn').disabled = false;
-    toast('저장되었습니다 ✅');
-    var idx = ANSWERABLE.indexOf(curQ);
-    if(idx < ANSWERABLE.length-1){ setTimeout(function(){ moveQ(1); }, 500); }
-    else { setTimeout(gotoList, 500); }
+    $('saveBtn').textContent = '수정하여 저장하기';
+    toast('저장되었습니다 ✅ 아래에서 실시간 보드를 확인하세요');
+    refresh(function(){ renderBoard(); updateSyncBanner(); });
   });
 }
 
@@ -526,7 +598,7 @@ function toggleReveal(qid){
 }
 
 /* ================= 발표 모드 ================= */
-var pSlides = [], pIdx = 0, pStageN = 0, pTimer = null;
+var pSlides = [], pIdx = 0, pStageN = 0, pTimer = null, pLastBroadcast = null;
 
 function buildSlides(){
   pSlides = [{t:'title'}];
@@ -624,6 +696,12 @@ function renderSlide(keepScroll){
     st.disabled = true;
   } else {
     var q = s.q;
+    // 진행 문항 브로드캐스트 → 학우 화면이 자동으로 따라옴
+    if(pLastBroadcast !== q.id){
+      pLastBroadcast = q.id;
+      currentQid = q.id;
+      apiPost({type:'current', cohort:'', name:me.name, qid:q.id, text:'', score:''});
+    }
     var max = pMaxStage(q);
     var showAns = (q.badge !== 'ceo') && pStageN >= 1;
     var showCeo = (q.badge === 'ceo' && pStageN >= 1) || pStageN >= 2;
