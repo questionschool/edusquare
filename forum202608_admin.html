@@ -54,6 +54,12 @@
   .b-ceoonly{background:rgba(245,193,105,.15);color:#F5C169}
   .b-skip{background:rgba(255,255,255,.08);color:#8FA6BC}
   .card.skip{opacity:.55}
+  .kind-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px;align-items:center}
+  .kchip{font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--sub);cursor:pointer;font-family:inherit}
+  .kchip.k-both.sel{background:var(--gold-bg);color:var(--mint);border-color:var(--mint)}
+  .kchip.k-ceo.sel{background:rgba(245,193,105,.15);color:#F5C169;border-color:#F5C169}
+  .kchip.k-only.sel{background:rgba(79,169,232,.14);color:#4FA9E8;border-color:#4FA9E8}
+  .kchip.k-skip.sel{background:rgba(255,255,255,.12);color:#C7D3DF;border-color:#8FA6BC}
   .prog{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13.5px}
   .prog .bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:8px;overflow:hidden}
   .prog .bar>div{height:100%;background:linear-gradient(90deg,var(--mint-deep),var(--mint));border-radius:4px;transition:width .3s}
@@ -316,12 +322,17 @@ var QUESTIONS = [
  {id:20, sec:'F', badge:'ceo', q:"에듀스퀘어 3년차, 지금 시점에서 학우들에게 바라는 것 한 가지는 무엇입니까? (하반기 전략발표회 요청 사항 포함)",
   ceo:"다들 열심히 잘하고 계시다. 그런데, AI 시대다. 이걸 무시하면서 갈 수가 없다. 누구보다도 적극적으로 사용하고, 미래가 어떻게 변할지 고민하고, AI 활용 능력을 극대화하되, AI에게 사고력과 판단력을 빼앗기지 않는 사람이 되어주었으면 좋겠다."}
 ];
-var ANSWERABLE = QUESTIONS.filter(function(x){return x.badge!=='ceo';});
-/* 이번 포럼에서 다루지 않기로 한 질문 (대표님 페이지에서만 표시) */
+/* 이번 포럼에서 다루지 않기로 한 질문 — 대표님 페이지에서 분류를 바꾸면 되살아남 */
 var EXCLUDED = [
- {id:12, sec:'D', q:'지난 철학포럼에서 "AI 시대에는 조변석개를 두려워하지 않는 리더가 살아남는다"고 하셨습니다. 그렇다면 원칙(철학)과 조변석개(유연함)는 어떻게 공존합니까?'},
- {id:18, sec:'F', q:'AI 시대의 승계자에게 요구되는 역량은, 대표님이 창업하시던 시절과 무엇이 다릅니까?'}
+ {id:12, sec:'D', badge:'skip', q:'지난 철학포럼에서 "AI 시대에는 조변석개를 두려워하지 않는 리더가 살아남는다"고 하셨습니다. 그렇다면 원칙(철학)과 조변석개(유연함)는 어떻게 공존합니까?'},
+ {id:18, sec:'F', badge:'skip', q:'AI 시대의 승계자에게 요구되는 역량은, 대표님이 창업하시던 시절과 무엇이 다릅니까?'}
 ];
+var ALLQ = QUESTIONS.concat(EXCLUDED).slice().sort(function(a,b){ return a.id-b.id; });
+/* 분류(kind): 시트의 kind 행이 내장 badge보다 우선 — both/ceo/only/skip */
+var kindOverrides = {};
+function kindOf(q){ return kindOverrides[q.id] || q.badge; }
+function activeQs(){ return ALLQ.filter(function(q){ return kindOf(q)!=='skip'; }); }
+function answerableQs(){ return activeQs().filter(function(q){ return kindOf(q)!=='ceo'; }); }
 
 /* ================= 상태 ================= */
 var me = {cohort:'', name:''};
@@ -364,6 +375,7 @@ function rebuild(rows){
     if(r.type==='reveal'){ reveals[r.qid] = (r.text==='on'); return; }
     if(r.type==='current'){ currentQid = r.qid==='' ? null : Number(r.qid); return; }
     if(r.type==='ceoedit'){ ceoEdits[r.qid] = {text:r.text, score:r.score}; return; }
+    if(r.type==='kind'){ kindOverrides[r.qid] = r.text; return; }
     if(r.type!=='answer') return;
     latest[r.cohort+'|'+r.name+'|'+r.qid] = r;
   });
@@ -398,7 +410,7 @@ function enterApp(){
   if(PAGE==='board'){
     refresh(function(){ renderBrowse(); $('viewBrowse').classList.remove('hidden'); });
   } else {
-    refresh(function(){ openQ((curQ&&curQ.id)||currentQid||QUESTIONS[0].id); });
+    refresh(function(){ openQ((curQ&&curQ.id)||currentQid||activeQs()[0].id); });
   }
   startPoll();
 }
@@ -468,11 +480,12 @@ function badgeHtml(b){
   return '<span class="badge b-ceo">대표님 전용 · 현장 공개</span>';
 }
 function renderList(){
-  var done = ANSWERABLE.filter(function(q){return myAnswers[q.id];}).length;
-  $('progText').textContent = '작성 진행 '+done+' / '+ANSWERABLE.length;
-  $('progBar').style.width = Math.round(done/ANSWERABLE.length*100)+'%';
+  var aq = answerableQs();
+  var done = aq.filter(function(q){return myAnswers[q.id];}).length;
+  $('progText').textContent = '작성 진행 '+done+' / '+aq.length;
+  $('progBar').style.width = Math.round(done/Math.max(1,aq.length)*100)+'%';
   var html = '', lastSec = '';
-  ANSWERABLE.forEach(function(q){
+  answerableQs().forEach(function(q){
     if(q.sec!==lastSec){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; lastSec=q.sec; }
     var st = myAnswers[q.id] ? '✅' : '📝';
     html += '<div class="q-item" onclick="openQ('+q.id+')"><span class="no">Q'+q.id+'</span><span class="qt">'+esc(q.q)+'</span><span class="st">'+st+'</span></div>';
@@ -482,14 +495,14 @@ function renderList(){
 
 /* ================= 작성 상세 ================= */
 function openQ(id){
-  curQ = QUESTIONS.find(function(q){return q.id===id;});
+  curQ = ALLQ.find(function(q){return q.id===id;});
   if(!curQ) return;
   $('viewWrite').classList.add('hidden');
   $('viewDetail').classList.remove('hidden');
   $('dSec').textContent = SECTIONS[curQ.sec];
   $('dQ').textContent = 'Q'+curQ.id+'. '+curQ.q;
   $('dBadge').innerHTML = '';
-  var isCeoOnly = curQ.badge==='ceo';
+  var isCeoOnly = kindOf(curQ)==='ceo';
   $('dHint').textContent = isCeoOnly ? '대표님이 답하시는 질문입니다 — 인터뷰를 들으시고, 공개되면 아래에서 답변을 볼 수 있습니다.' : (curQ.hint||'');
   $('dText').classList.toggle('hidden', isCeoOnly);
   $('saveBtn').classList.toggle('hidden', isCeoOnly);
@@ -505,9 +518,10 @@ function openQ(id){
     $('dScoreWrap').classList.add('hidden'); curScore=null;
     $('dText').placeholder='여기에 생각을 적어 주세요';
   }
-  var idx = QUESTIONS.indexOf(curQ);
+  var seq = activeQs();
+  var idx = seq.indexOf(curQ);
   $('prevBtn').disabled = idx<=0;
-  $('nextBtn').disabled = idx>=QUESTIONS.length-1;
+  $('nextBtn').disabled = idx>=seq.length-1;
   $('saveBtn').textContent = mine ? '수정하여 저장하기' : '저장하기';
   renderBoard();
   updateSyncBanner();
@@ -517,7 +531,7 @@ function openQ(id){
 function renderBoard(){
   if(!curQ){ $('dBoard').innerHTML=''; return; }
   var q = curQ, html = '';
-  if(q.badge==='ceo'){
+  if(kindOf(q)==='ceo'){
     html = '<div class="card">'+ceoCardHtml(q,false)+'</div>';
   } else if(!myAnswers[q.id]){
     html = '<div class="card"><div class="empty">🔒 나의 답변을 저장하면, 이 질문의 실시간 보드(학우들의 답'+(ceoOf(q)?' + 대표님의 답':'')+')가 열립니다.</div></div>';
@@ -540,8 +554,9 @@ function renderScore(){
 }
 function pickScore(i){ curScore=i; renderScore(); }
 function moveQ(d){
-  var idx = QUESTIONS.indexOf(curQ) + d;
-  if(idx>=0 && idx<QUESTIONS.length) openQ(QUESTIONS[idx].id);
+  var seq = activeQs();
+  var idx = seq.indexOf(curQ) + d;
+  if(idx>=0 && idx<seq.length) openQ(seq[idx].id);
 }
 function saveAnswer(){
   var t = $('dText').value.trim();
@@ -606,10 +621,10 @@ function answersHtml(q, showAll){
 }
 function renderBrowse(){
   var html = '', lastSec='';
-  QUESTIONS.forEach(function(q){
+  activeQs().forEach(function(q){
     if(q.sec!==lastSec){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; lastSec=q.sec; }
     html += '<div class="card"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
-    if(q.badge!=='ceo'){
+    if(kindOf(q)!=='ceo'){
       var cnt = (allAnswers[q.id]||[]).length;
       html += '<div style="font-size:12.5px;font-weight:700;color:var(--sub);margin:10px 0 2px">학우 답변 '+cnt+'개</div>';
       html += answersHtml(q, false);
@@ -631,7 +646,7 @@ function renderAdmin(){
   $('admBody').classList.remove('hidden');
   $('tglAll').classList.toggle('on', reveals['ALL']===true);
   var html='';
-  QUESTIONS.forEach(function(q){
+  activeQs().forEach(function(q){
     if(!ceoOf(q)) return;
     html += '<div class="adm-row"><span class="no" style="font-weight:800;color:var(--navy)">Q'+q.id+'</span><div class="qt">'+esc(q.q.length>40?q.q.slice(0,40)+'…':q.q)+'</div><div class="toggle'+(isRevealed(q.id)?' on':'')+'" onclick="toggleReveal('+q.id+')"></div></div>';
   });
@@ -649,7 +664,7 @@ function renderAdmin(){
   rows.sort(function(a,b){ return a.cohort===b.cohort ? a.name.localeCompare(b.name) : a.cohort.localeCompare(b.cohort); });
   if(!rows.length){ $('admStatus').innerHTML='<div class="empty">아직 작성자가 없습니다.</div>'; return; }
   var t = '<table class="status"><tr><th>기수</th><th>이름</th><th>작성</th></tr>';
-  rows.forEach(function(r){ t += '<tr><td>'+esc(r.cohort)+'</td><td>'+esc(r.name)+'</td><td>'+r.cnt+' / '+ANSWERABLE.length+'</td></tr>'; });
+  rows.forEach(function(r){ t += '<tr><td>'+esc(r.cohort)+'</td><td>'+esc(r.name)+'</td><td>'+r.cnt+' / '+answerableQs().length+'</td></tr>'; });
   t += '</table>';
   $('admStatus').innerHTML = t;
 }
@@ -669,45 +684,56 @@ function ceoLogin(){
   $('ceoGate').classList.add('hidden');
   refresh(renderCeo);
 }
-function ceoKindBadge(q){
-  if(q.excluded) return '<span class="badge b-skip">다루지 않음</span>';
-  if(q.badge==='ceo') return '<span class="badge b-ceoonly">대표님만 답변</span>';
-  if(q.badge==='only') return '<span class="badge b-only2">학우만 답변</span>';
-  return '<span class="badge b-both">모두 답변</span>';
+var KIND_LABELS = {both:'모두 답변', ceo:'대표님만 답변', only:'학우만 답변', skip:'다루지 않음'};
+function ceoCardMarkup(q){
+  var kind = kindOf(q);
+  var c = ceoOf(q);
+  var chips = ['both','ceo','only','skip'].map(function(k){
+    return '<button class="kchip k-'+k+(kind===k?' sel':'')+'" onclick="setKind('+q.id+',\''+k+'\')">'+KIND_LABELS[k]+'</button>';
+  }).join('');
+  var status = '';
+  if(kind !== 'skip'){
+    status = c ? (isRevealed(q.id) ? '<span class="badge b-both">공개됨</span>' : '<span class="badge b-ceo">공개 전</span>')
+               : '<span class="badge b-ceo">답변 없음</span>';
+  }
+  var html = '<div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
+  html += '<div class="kind-row">'+chips+status+'</div>';
+  if(kind === 'skip'){
+    html += '<div class="hint" style="margin:2px 0 0">이번 포럼에서는 다루지 않는 질문입니다. 다른 분류를 탭하면 되살아납니다.</div>';
+    return html;
+  }
+  if(q.special === 'score'){
+    var sc = c && c.score!=null ? c.score : null;
+    html += '<div class="score-grid" id="ceoG'+q.id+'" data-score="'+(sc==null?'':sc)+'">';
+    for(var i=0;i<=10;i++){ html += '<button class="score-btn'+(sc===i?' sel':'')+'" onclick="pickCeoScore(this,'+i+')">'+i+'</button>'; }
+    html += '</div>';
+  }
+  html += '<textarea id="ceoT'+q.id+'" placeholder="대표님 답변을 입력해 주세요">'+(c?esc(c.text):'')+'</textarea>';
+  html += '<div style="height:10px"></div><button class="btn" onclick="saveCeo('+q.id+')">저장하기</button>';
+  return html;
 }
 function renderCeo(){
   $('ceoBody').classList.remove('hidden');
-  var html = '<div class="note">질문별로 답변을 수정하고 저장하면, 즉시 모든 화면(학우 참여·모두의 답·발표 화면)에 반영됩니다. 아직 공개 전인 답변은 학우들에게 보이지 않으며, 포럼 진행에 맞춰 공개됩니다.<br><br>'
-    + '<span class="badge b-ceoonly">대표님만 답변</span> 인터뷰에서 대표님만 답하는 질문 &nbsp;'
+  var html = '<div class="note">질문별로 <b>분류를 탭해서 바꾸고</b>, 답변을 수정해 저장하면 즉시 모든 화면(학우 참여·모두의 답·발표 화면)에 반영됩니다. 아직 공개 전인 답변은 학우들에게 보이지 않으며, 포럼 진행에 맞춰 공개됩니다.<br><br>'
     + '<span class="badge b-both">모두 답변</span> 학우들도 같은 질문에 답해 현장에서 대조 &nbsp;'
+    + '<span class="badge b-ceoonly">대표님만 답변</span> 인터뷰에서 대표님만 답하는 질문 &nbsp;'
     + '<span class="badge b-only2">학우만 답변</span> 학우들이 답하고 대표님은 코멘트 &nbsp;'
-    + '<span class="badge b-skip">다루지 않음</span> 이번 포럼에서 제외된 질문</div>';
-  var items = QUESTIONS.concat(EXCLUDED.map(function(x){ x.excluded = true; return x; }))
-    .slice().sort(function(a,b){ return a.id - b.id; });
+    + '<span class="badge b-skip">다루지 않음</span> 이번 포럼에서 제외 — 학우 화면·발표에서 빠집니다</div>';
   var last = '';
-  items.forEach(function(q){
+  ALLQ.forEach(function(q){
     if(q.sec !== last){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; last = q.sec; }
-    if(q.excluded){
-      html += '<div class="card skip"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
-      html += '<div style="margin:4px 0 2px">'+ceoKindBadge(q)+'</div>';
-      html += '<div class="hint" style="margin:6px 0 0">이번 포럼에서는 다루지 않기로 한 질문입니다.</div></div>';
-      return;
-    }
-    var c = ceoOf(q);
-    var status = c ? (isRevealed(q.id) ? '<span class="badge b-both">공개됨</span>' : '<span class="badge b-ceo">공개 전</span>')
-                   : '<span class="badge b-ceo">답변 없음 — 작성하면 공개 대상에 추가됩니다</span>';
-    html += '<div class="card"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
-    html += '<div style="margin:4px 0 8px">'+ceoKindBadge(q)+' '+status+'</div>';
-    if(q.special === 'score'){
-      var sc = c && c.score!=null ? c.score : null;
-      html += '<div class="score-grid" id="ceoG'+q.id+'" data-score="'+(sc==null?'':sc)+'">';
-      for(var i=0;i<=10;i++){ html += '<button class="score-btn'+(sc===i?' sel':'')+'" onclick="pickCeoScore(this,'+i+')">'+i+'</button>'; }
-      html += '</div>';
-    }
-    html += '<textarea id="ceoT'+q.id+'" placeholder="대표님 답변을 입력해 주세요">'+(c?esc(c.text):'')+'</textarea>';
-    html += '<div style="height:10px"></div><button class="btn" onclick="saveCeo('+q.id+')">저장하기</button></div>';
+    html += '<div class="card'+(kindOf(q)==='skip'?' skip':'')+'" id="ceoCard'+q.id+'">'+ceoCardMarkup(q)+'</div>';
   });
   $('ceoBody').innerHTML = html;
+}
+function setKind(qid, kind){
+  var q = ALLQ.find(function(x){ return x.id===qid; });
+  if(!q || kindOf(q) === kind) return;
+  kindOverrides[qid] = kind;
+  apiPost({type:'kind', cohort:'', name:'대표님', qid:qid, text:kind, score:''});
+  var card = $('ceoCard'+qid);
+  if(card){ card.className = 'card'+(kind==='skip'?' skip':''); card.innerHTML = ceoCardMarkup(q); }
+  toast('Q'+qid+' → '+KIND_LABELS[kind]+' ✅');
 }
 function pickCeoScore(btn, i){
   var g = btn.parentElement;
@@ -716,7 +742,7 @@ function pickCeoScore(btn, i){
   g.dataset.score = i;
 }
 function saveCeo(id){
-  var q = QUESTIONS.find(function(x){ return x.id===id; });
+  var q = ALLQ.find(function(x){ return x.id===id; });
   var t = $('ceoT'+id).value.trim();
   if(!t){ toast('내용을 입력해 주세요'); return; }
   var s = '';
@@ -737,7 +763,7 @@ var pSlides = [], pIdx = 0, pStageN = 0, pTimer = null, pLastBroadcast = null;
 function buildSlides(){
   pSlides = [{t:'title'}];
   var last = '';
-  QUESTIONS.forEach(function(q){
+  activeQs().forEach(function(q){
     if(q.sec !== last){ pSlides.push({t:'sec', sec:q.sec}); last = q.sec; }
     pSlides.push({t:'q', q:q});
   });
@@ -770,7 +796,7 @@ function pMove(d){
   renderSlide();
 }
 function pMaxStage(q){
-  if(q.badge === 'ceo') return 1;      // 질문 → 대표님 답변
+  if(kindOf(q) === 'ceo') return 1;    // 질문 → 대표님 답변
   return ceoOf(q) ? 2 : 1;             // 질문 → 학우 답변 (→ 대표님 답변)
 }
 function pStage(){
@@ -779,7 +805,7 @@ function pStage(){
   var max = pMaxStage(s.q);
   if(pStageN >= max){ pMove(1); return; }
   pStageN++;
-  var ceoNow = (s.q.badge === 'ceo' && pStageN >= 1) || pStageN >= 2;
+  var ceoNow = (kindOf(s.q) === 'ceo' && pStageN >= 1) || pStageN >= 2;
   if(ceoNow && ceoOf(s.q) && !isRevealed(s.q.id)){
     reveals[s.q.id] = true;  // 즉시 반영 + 시트 기록 → 학우 폰에도 공개
     apiPost({type:'reveal', cohort:'', name:me.name, qid:s.q.id, text:'on', score:''});
@@ -838,8 +864,8 @@ function renderSlide(keepScroll){
       apiPost({type:'current', cohort:'', name:me.name, qid:q.id, text:'', score:''});
     }
     var max = pMaxStage(q);
-    var showAns = (q.badge !== 'ceo') && pStageN >= 1;
-    var showCeo = (q.badge === 'ceo' && pStageN >= 1) || pStageN >= 2;
+    var showAns = (kindOf(q) !== 'ceo') && pStageN >= 1;
+    var showCeo = (kindOf(q) === 'ceo' && pStageN >= 1) || pStageN >= 2;
     var html = '<div class="p-sec">' + esc(SECTIONS[q.sec]) + '</div>';
     html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.q) + '</div>';
     if(showAns) html += pAnswersHtml(q);
@@ -848,7 +874,7 @@ function renderSlide(keepScroll){
     // 대표님 답변이 마지막에 공개되므로, 공개 순간 해당 카드가 보이도록 스크롤
     if(showCeo && !keepScroll){ var pc = body.querySelector('.p-ceo'); if(pc) pc.scrollIntoView({block:'end'}); return; }
     if(pStageN >= max){ st.textContent = '다음 질문 →'; }
-    else if(q.badge === 'ceo' || pStageN >= 1){ st.textContent = '🎤 대표님 답변 공개'; }
+    else if(kindOf(q) === 'ceo' || pStageN >= 1){ st.textContent = '🎤 대표님 답변 공개'; }
     else { st.textContent = '학우 답변 보기'; }
   }
   body.scrollTop = prevScroll;
