@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDUSQUARE 경영포럼 — AX 인터뷰</title>
+<style>
+  :root{
+    --mint:#3EE795; --mint-deep:#2BC77C; --mint-ink:#062B1A;
+    --navy:#3EE795; --navy-d:#0E2C49; --gold:#3EE795; --green:#3EE795;
+    --bg:#07131F; --card:rgba(255,255,255,.055); --line:rgba(255,255,255,.14);
+    --txt:#E9F3F7; --sub:#93A9BD; --blue:#4FA9E8;
+    --gold-bg:rgba(62,231,149,.13); --green-bg:rgba(62,231,149,.13); --navy-bg:rgba(79,169,232,.14);
+    --plexus:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cg stroke='%233EE795' stroke-opacity='0.07' fill='none'%3E%3Cpath d='M60 580 L200 480 L330 560 L470 460 L640 540'/%3E%3Cpath d='M110 140 L250 210 L390 120 L540 190'/%3E%3Cpath d='M200 480 L250 210'/%3E%3Cpath d='M470 460 L390 120'/%3E%3Cpath d='M330 560 L540 190'/%3E%3C/g%3E%3Cg fill='%233EE795' fill-opacity='0.22'%3E%3Ccircle cx='60' cy='580' r='2'/%3E%3Ccircle cx='200' cy='480' r='3'/%3E%3Ccircle cx='330' cy='560' r='2'/%3E%3Ccircle cx='470' cy='460' r='3'/%3E%3Ccircle cx='640' cy='540' r='2'/%3E%3Ccircle cx='110' cy='140' r='2'/%3E%3Ccircle cx='250' cy='210' r='3'/%3E%3Ccircle cx='390' cy='120' r='2'/%3E%3Ccircle cx='540' cy='190' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;color:var(--txt);line-height:1.55;padding-bottom:60px;
+    background:linear-gradient(180deg,#0B1D31 0%,#07131F 60%,#081A2B 100%) fixed;
+  }
+  body::before{content:'';position:fixed;inset:0;background-image:var(--plexus);background-size:700px;pointer-events:none;z-index:0}
+  .wrap{max-width:640px;margin:0 auto;padding:16px;position:relative;z-index:1}
+  header{background:rgba(255,255,255,.03);border-bottom:1px solid var(--line);color:#fff;padding:18px 16px 14px;text-align:center;position:relative;z-index:1}
+  header h1{font-size:17px;letter-spacing:1px;font-weight:800}
+  header h1 .lg-edu{background:linear-gradient(135deg,#5BD4E8,#1E6FD9);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  header h1 .lg-sq{color:#8FB8D8;font-weight:600}
+  header .sub{font-size:12px;color:var(--sub);margin-top:4px}
+  header .sub b{color:var(--mint)}
+  header .who{font-size:12px;margin-top:6px;background:rgba(62,231,149,.14);color:var(--mint);display:inline-block;padding:2px 10px;border-radius:12px;font-weight:700}
+  .tabs{display:flex;background:rgba(9,22,37,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+  .tab{flex:1;text-align:center;padding:12px 4px;font-size:13.5px;font-weight:700;color:var(--sub);border-bottom:3px solid transparent;cursor:pointer;user-select:none}
+  .tab.on{color:var(--mint);border-bottom-color:var(--mint)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;backdrop-filter:blur(2px)}
+  .btn{display:block;width:100%;padding:13px;border:none;border-radius:10px;background:var(--mint);color:var(--mint-ink);font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+  .btn:disabled{background:#33584A;color:#7FA391}
+  .btn.ghost{background:transparent;color:var(--mint);border:1.5px solid rgba(62,231,149,.6)}
+  .btn.sm{width:auto;display:inline-block;padding:8px 14px;font-size:13px;border-radius:8px}
+  .cohort-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+  .cohort-btn{padding:16px;border:1.5px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--txt)}
+  .cohort-btn.sel{border-color:var(--mint);background:var(--gold-bg);color:var(--mint)}
+  input[type=text],textarea{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;background:rgba(4,14,24,.6);color:var(--txt)}
+  textarea{min-height:130px;resize:vertical;line-height:1.6}
+  input::placeholder,textarea::placeholder{color:#5E7890}
+  input:focus,textarea:focus{outline:none;border-color:var(--mint)}
+  .sec-title{font-size:13px;font-weight:800;color:var(--mint);margin:20px 0 8px;letter-spacing:.5px}
+  .q-item{display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:8px;cursor:pointer}
+  .q-item .no{font-weight:800;color:var(--mint);font-size:14px;white-space:nowrap}
+  .q-item .qt{font-size:13.5px;flex:1}
+  .q-item .st{font-size:17px;line-height:1}
+  .badge{display:inline-block;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:9px;vertical-align:1px;margin-left:5px;white-space:nowrap}
+  .b-both{background:var(--gold-bg);color:var(--mint)}
+  .b-only{background:var(--green-bg);color:var(--mint)}
+  .b-ceo{background:var(--navy-bg);color:var(--blue)}
+  .prog{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13.5px}
+  .prog .bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:8px;overflow:hidden}
+  .prog .bar>div{height:100%;background:linear-gradient(90deg,var(--mint-deep),var(--mint));border-radius:4px;transition:width .3s}
+  .q-full{font-size:15.5px;font-weight:700;line-height:1.5;margin-bottom:4px}
+  .hint{font-size:12.5px;color:var(--sub);margin-bottom:12px}
+  .nav-row{display:flex;gap:8px;margin-top:10px}
+  .nav-row .btn{flex:1}
+  .score-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:10px 0}
+  .score-btn{padding:11px 0;border:1.5px solid var(--line);border-radius:9px;background:rgba(255,255,255,.04);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--txt)}
+  .score-btn.sel{border-color:var(--mint);background:var(--gold-bg);color:var(--mint)}
+  .ans{border-top:1px solid var(--line);padding:10px 2px}
+  .ans .meta{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:3px}
+  .ans .meta .co{color:var(--sub);font-weight:600}
+  .ans .body{font-size:14px;white-space:pre-wrap}
+  .ans .score-chip{display:inline-block;background:var(--gold-bg);color:var(--mint);font-weight:800;font-size:12px;padding:1px 8px;border-radius:9px;margin-right:5px}
+  .ceo-card{border:1.5px solid var(--mint);border-radius:12px;margin:12px 0 4px;overflow:hidden;box-shadow:0 0 18px rgba(62,231,149,.12)}
+  .ceo-card .head{background:var(--gold-bg);color:var(--mint);font-size:13px;font-weight:800;padding:8px 13px}
+  .ceo-card .body{padding:12px 13px;font-size:14px;white-space:pre-wrap;background:rgba(4,14,24,.5)}
+  .ceo-card.locked{border-color:rgba(62,231,149,.35);box-shadow:none}
+  .ceo-card.locked .body{color:var(--sub);font-size:13px}
+  .dist{margin:8px 0}
+  .dist-row{display:flex;align-items:center;gap:8px;font-size:12.5px;margin-bottom:4px}
+  .dist-row .lab{width:34px;text-align:right;font-weight:700;color:var(--sub)}
+  .dist-row .track{flex:1;height:14px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+  .dist-row .fill{height:100%;background:linear-gradient(90deg,var(--mint-deep),var(--mint));border-radius:4px}
+  .dist-row .cnt{width:24px;font-weight:700}
+  .toggle{position:relative;width:46px;height:26px;background:#33465C;border-radius:13px;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .toggle.on{background:var(--mint)}
+  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s}
+  .toggle.on::after{left:23px}
+  .adm-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid var(--line);font-size:13.5px}
+  .adm-row .qt{flex:1}
+  table.status{width:100%;border-collapse:collapse;font-size:13px}
+  table.status th,table.status td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+  table.status th{background:var(--gold-bg);color:var(--mint)}
+  .msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--mint);color:var(--mint-ink);padding:10px 22px;border-radius:22px;font-size:14px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+  .msg.show{opacity:1}
+  .sync-banner{background:var(--mint);color:var(--mint-ink);border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:800;text-align:center;margin-bottom:10px;cursor:pointer;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.75}}
+  .board-title{font-weight:800;font-size:14px;color:var(--mint);margin-bottom:6px}
+  .note{font-size:12.5px;color:#B9CBDC;background:rgba(79,169,232,.1);border:1px solid rgba(79,169,232,.2);border-radius:10px;padding:10px 13px;margin-bottom:14px}
+  .demo-banner{background:#3A2E10;color:#F5C169;font-size:12px;text-align:center;padding:6px;position:relative;z-index:1}
+  .hidden{display:none!important}
+  .loading{text-align:center;color:var(--sub);padding:30px 0;font-size:14px}
+  .empty{color:var(--sub);font-size:13px;padding:10px 2px}
+  /* ===== 발표 모드 (프로젝터용) ===== */
+  #present{position:fixed;inset:0;background:linear-gradient(155deg,#081527 0%,#0E2C49 100%);color:#fff;z-index:50;display:none;flex-direction:column}
+  #present::before{content:'';position:absolute;inset:0;background-image:var(--plexus);background-size:700px;pointer-events:none}
+  #present.show{display:flex}
+  #present>*{position:relative}
+  .p-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 24px;font-size:13px;opacity:.9;flex-shrink:0}
+  .p-top .lg-edu{background:linear-gradient(135deg,#5BD4E8,#4FA9E8);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .p-body{flex:1;overflow-y:auto;padding:1vh 5vw 2vh}
+  .p-center{min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .p-title{font-size:clamp(30px,4.5vw,60px);font-weight:800;line-height:1.4;word-break:keep-all}
+  .p-title .accent{color:#3EE795}
+  .p-sub{font-size:clamp(15px,1.8vw,24px);opacity:.8;margin-top:2.5vh}
+  .p-sec{font-size:clamp(14px,1.6vw,20px);font-weight:800;color:#3EE795;letter-spacing:.5px;margin-bottom:1.2vh}
+  .p-qnum{color:#3EE795;margin-right:.45em}
+  .p-q{font-size:clamp(22px,3vw,42px);font-weight:800;line-height:1.4;margin-bottom:2.5vh;word-break:keep-all}
+  .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding-bottom:2vh}
+  .p-ans{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:13px 15px}
+  .p-ans .meta{font-size:clamp(12px,1.1vw,15px);font-weight:800;color:#7FD0F5;margin-bottom:4px}
+  .p-ans .body{font-size:clamp(14px,1.4vw,19px);line-height:1.5;white-space:pre-wrap}
+  .p-ans .score-chip{background:rgba(62,231,149,.2);color:#3EE795}
+  .p-ceo{border:2px solid #3EE795;background:rgba(62,231,149,.09);border-radius:14px;padding:2vh 2vw;margin-bottom:2.5vh;animation:pIn .4s ease;box-shadow:0 0 30px rgba(62,231,149,.15)}
+  .p-ceo .h{font-size:clamp(14px,1.5vw,20px);font-weight:800;color:#3EE795;margin-bottom:1vh}
+  .p-ceo .b{font-size:clamp(17px,2vw,27px);line-height:1.6;white-space:pre-wrap}
+  .p-ceo .score-chip{background:#3EE795;color:#062B1A;font-size:clamp(14px,1.5vw,19px)}
+  @keyframes pIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .p-cnt-label{font-size:clamp(13px,1.3vw,17px);font-weight:800;color:#7FD0F5;margin:1vh 0}
+  .p-bar{display:flex;gap:10px;align-items:center;padding:12px 24px 16px;flex-wrap:wrap;flex-shrink:0}
+  .p-btn{padding:11px 20px;border-radius:10px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.08);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+  .p-btn.gold{background:#3EE795;border-color:#3EE795;color:#062B1A;font-weight:800}
+  .p-btn:disabled{opacity:.35;cursor:default}
+  .p-keys{font-size:11.5px;opacity:.55;margin-left:auto}
+  #present .dist{max-width:620px}
+  #present .dist-row{font-size:clamp(13px,1.4vw,17px);margin-bottom:6px}
+  #present .dist-row .lab{color:#C8D8EA;width:46px}
+  #present .dist-row .cnt{color:#fff;width:34px}
+  #present .dist-row .track{background:rgba(255,255,255,.16);height:clamp(14px,1.6vw,20px)}
+  #present .dist-row .fill{background:#3EE795}
+  .dist-avg{font-size:12.5px;color:var(--sub);margin-top:4px}
+  #present .dist-avg{color:#C8D8EA;font-size:clamp(13px,1.4vw,17px)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="lg-edu">EDU</span><span class="lg-sq">SQUARE</span> 경영포럼 2026</h1>
+  <div class="sub">"AI 혁신의 시대, 리더는 무엇을 해야 하는가?" · 8/23(일)</div>
+  <div class="who hidden" id="whoChip"></div>
+</header>
+<div class="demo-banner hidden" id="demoBanner">⚠ 데모 모드 — 백엔드(SCRIPT_URL) 미설정, 답변이 이 기기에만 임시 저장됩니다</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab" data-page="live" onclick="nav('live')">▶ 포럼 참여</div>
+  <div class="tab" data-page="board" onclick="nav('board')">👀 모두의 답</div>
+  <div class="tab" data-page="admin" onclick="nav('admin')">⚙ 진행자</div>
+</div>
+
+<div class="wrap">
+  <!-- 로그인 -->
+  <div id="viewLogin">
+    <div class="card">
+      <div class="q-full">기수를 선택해 주세요</div>
+      <div class="cohort-grid" id="cohortGrid"></div>
+      <div class="q-full" style="margin-top:6px">이름</div>
+      <input type="text" id="nameInput" placeholder="이름을 입력해 주세요" maxlength="20">
+      <div style="height:14px"></div>
+      <button class="btn" id="loginBtn" onclick="doLogin()">시작하기</button>
+    </div>
+    <div class="note">참여 안내 — 포럼 진행에 맞춰 문항이 하나씩 진행됩니다. 각 질문에 나의 생각을 적어 저장하면, 그 질문의 실시간 답변 보드(학우들의 답 + 대표님의 답)가 열립니다. 진행자가 다음 질문으로 넘어가면 내 화면도 함께 이동합니다.</div>
+  </div>
+
+  <!-- 작성 목록 -->
+  <div id="viewWrite" class="hidden">
+    <div class="prog"><b id="progText"></b><div class="bar"><div id="progBar" style="width:0%"></div></div></div>
+    <div id="qList"></div>
+  </div>
+
+  <!-- 문항 진행 (라이브) -->
+  <div id="viewDetail" class="hidden">
+    <div id="syncBanner" class="sync-banner hidden" onclick="followNow()">▶ 지금 <b id="syncQLabel"></b> 진행 중 — 탭하여 이동</div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:800;color:var(--sub);margin-bottom:6px" id="dSec"></div>
+      <div class="q-full" id="dQ"></div>
+      <div id="dBadge" style="margin-bottom:6px"></div>
+      <div class="hint" id="dHint"></div>
+      <div id="dScoreWrap" class="hidden">
+        <div style="font-size:13.5px;font-weight:700;margin-bottom:2px">나의 위기감 점수 (0~10)</div>
+        <div class="score-grid" id="scoreGrid"></div>
+      </div>
+      <textarea id="dText" placeholder="여기에 생각을 적어 주세요"></textarea>
+      <div style="height:12px"></div>
+      <button class="btn" id="saveBtn" onclick="saveAnswer()">저장하기</button>
+      <div class="nav-row">
+        <button class="btn ghost" onclick="gotoList()">목록</button>
+        <button class="btn ghost" id="prevBtn" onclick="moveQ(-1)">← 이전</button>
+        <button class="btn ghost" id="nextBtn" onclick="moveQ(1)">다음 →</button>
+      </div>
+    </div>
+    <div id="dBoard"></div>
+  </div>
+
+  <!-- 모두의 답 -->
+  <div id="viewBrowse" class="hidden">
+    <div class="note">학우들의 답변과, 공개된 대표님 답변을 볼 수 있습니다. 🔒 표시는 포럼 현장에서 인터뷰 진행에 맞춰 하나씩 공개됩니다.</div>
+    <div id="browseList"></div>
+  </div>
+
+  <!-- 관리자 -->
+  <div id="viewAdmin" class="hidden">
+    <div class="card" id="admGate">
+      <div class="q-full">진행자 비밀번호</div>
+      <input type="text" id="admPw" placeholder="비밀번호">
+      <div style="height:12px"></div>
+      <button class="btn" onclick="admLogin()">입장</button>
+    </div>
+    <div id="admBody" class="hidden">
+      <button class="btn" style="margin-bottom:12px;background:var(--navy-d)" onclick="enterPresent()">🖥 발표 모드 시작 — 프로젝터 화면용 (F11 전체화면 추천)</button>
+      <div class="card">
+        <div class="q-full" style="margin-bottom:8px">대표님 답변 공개 토글</div>
+        <div class="adm-row" style="border-top:none;background:var(--gold-bg);border-radius:8px;padding:10px">
+          <div class="qt"><b>전체 일괄 공개</b></div>
+          <div class="toggle" id="tglAll" onclick="toggleReveal('ALL')"></div>
+        </div>
+        <div id="admToggles"></div>
+      </div>
+      <div class="card">
+        <div class="q-full" style="margin-bottom:8px">작성 현황</div>
+        <div id="admStatus"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 발표 모드 (프로젝터) -->
+<div id="present">
+  <div class="p-top">
+    <span id="pCount"></span>
+    <span><span class="lg-edu">EDU</span>SQUARE 경영포럼 2026 — AX 그리고 리더</span>
+    <button class="p-btn" onclick="exitPresent()">✕ 종료</button>
+  </div>
+  <div class="p-body" id="pBody"></div>
+  <div class="p-bar">
+    <button class="p-btn" onclick="pMove(-1)">← 이전</button>
+    <button class="p-btn" onclick="pMove(1)">다음 →</button>
+    <button class="p-btn gold" id="pStageBtn" onclick="pStage()"></button>
+    <button class="p-btn" onclick="pRefresh()">↻ 새로고침</button>
+    <span class="p-keys">←→ 슬라이드 · Enter 단계 진행 · R 새로고침 · ESC 종료</span>
+  </div>
+</div>
+
+<div class="msg" id="msg"></div>
+
+<script>
+/* ================= 설정 ================= */
+var PAGE = 'board';   // 이 파일의 역할: live=포럼 참여 / board=모두의 답 / admin=진행자
+var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html' };
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuuhoVY27FU-i-8yRI8UB2OuFzPoteRJ5kU0B_htmYl4bQbv76yJfmpc7Pry-_LdQTOQ/exec';
+var ADMIN_PW   = 'edu2026';     // ← 진행자(학장) 비밀번호
+var COHORTS = ['1기','2기','3기','운영팀'];
+
+/* ================= 질문 데이터 =================
+   badge: both=대표님 답과 대조(★) / only=학우 전용 / ceo=대표님 전용(현장 공개)
+   ceo: 대표님 답변 (공개 토글로 오픈) */
+var SECTIONS = {A:'A. AX : AI시대, 우리의 전환', B:'B. 교육 사업의 본질', C:'C. Why Change — 왜 변해야 하는가', D:'D. What to Change — 무엇을 바꿔야 하는가', E:'E. How to Change — 리더는 어떻게 이끄는가', F:'F. 승계와 에듀스퀘어'};
+var QUESTIONS = [
+ {id:1, sec:'A', badge:'both', q:"여러분의 일상적인 '일과 업무'에 AI가 들어와 활용되고 있는 장면을 소개해주세요. 직접 AI를 활용해보면서 가장 놀랐던(혹은 실망했던) 순간은 언제인가요?",
+  ceo:"2025년 바이브 코딩을 할 때는 비개발자에게 걸림돌이 꽤 있어서 하다가 화낸 적이 많았다. 그런데 올해 연간총회 끝나고 3월에, 20여 년 전부터 도메인 비용만 내고 버려둔 개인홈페이지가 있었는데, 그 전체 내용을 클로드가 DB까지 깔끔하게 한 번에 새 사이트로 변환하는 모습을 보고 정말 깜짝 놀랐다."},
+ {id:2, sec:'A', badge:'both', q:"여러분은 AI를 어떻게 배우고 계십니까? 나만의 AI 공부법을 소개해주세요.",
+  ceo:"크게 3가지 방법이 있다. 첫째, AI 자체가 이미 답을 다 알고 있다 — 내가 어떻게 질문하느냐에 따라 답이 나오기 때문에, AI와의 질문답변 과정에서 가장 많이 배운다. 둘째, 유튜브 — 조코딩·코드팩토리 같은 영상은 거의 다 챙겨 본다. 셋째, IT본부 직원분들과의 교류 — 해커톤이나 회의에서 많은 것을 배운다."},
+ {id:3, sec:'A', badge:'both', q:"에듀플렉스에서 앞으로 AI를 활용해 꼭 도전해보면 좋겠다고 생각하는 실험이 있다면 무엇입니까?",
+  hint:"대표님은 '지금 진행 중인 실험 중 가장 기대되는 것'에 답하십니다 — 현재와 미래를 대조합니다.",
+  ceo:"(지금 실험 중 가장 기대되는 것) CUBION이다. educube는 그것을 담는 그릇이다. 가장 아쉬운 것은 속도 — 더 빨리 하고 싶다."},
+ {id:4, sec:'B', badge:'both', q:"교육사업 영역에서 10년 후에도 바뀌지 않을 것은 무엇일까요?",
+  ceo:"스스로 생각하는 능력, 스스로 해내는 능력의 중요성은 10년 후에 바뀌기는커녕 더 중요해질 것이다. 이 능력이 더 귀해지는 시대가 오고 있다."},
+ {id:5, sec:'B', badge:'ceo', q:"AI가 다 가르쳐주는 시대, 자기주도학습(에듀플렉스 모델)의 가치는 커집니까, 작아집니까?",
+  ceo:"훨씬 더 커진다. 학부모들은 자녀가 AI에 휘둘리지 않는 사고력과 판단력, 논리력을 키우길 기대할 것이다. 그러려면 방주(Ark) 교육이 필요하다 — 일정 기간 AI를 단절시키고, 순전히 자신의 힘으로만 학습하고 문제를 해결하는 환경을 만들 필요가 있다. 이런 교육들이 각광받을 것이라 생각한다."},
+ {id:6, sec:'B', badge:'only', q:"현장에서 학생·학부모가 AI로 달라졌다고 체감하시는 변화가 있습니까?",
+  hint:"현장에 있는 여러분만 답할 수 있는 질문입니다 — 고객 관점의 변화 신호."},
+ {id:7, sec:'C', badge:'ceo', q:"우리가 변화하지 않는다면 3~5년 뒤 에듀플렉스에 어떤 일이 벌어질까요? 반대로 AX에 성공한다면 어떤 가능성이 열립니까?",
+  ceo:"사라질 가능성이 높다. AI로 중무장한 신규 업체가 등장했을 때 대등하게 경쟁할 수 없다면 시장에서 사라질 가능성이 높다. 우리만 그런 것이 아니라 현존하는 어떤 회사라도 그렇다."},
+ {id:8, sec:'C', badge:'ceo', q:"20여 년 경영하시며 여러 전환을 경험하셨습니다. 어떤 전환이 가장 컸고, 그때와 지금의 AI 전환은 무엇이 다릅니까?",
+  ceo:"외부 환경에 의한 변화로는, 전단지로 마케팅하던 시절이 끝나고 온라인 마케팅으로 전환하던 시절이 가장 힘들었다. 회사에 큰 위기였다. 지금의 AI 전환은 그런 것과는 차원 자체가 다르다 — AI 시대에 모두가, 모든 것이 적응하지 못하면 그때와는 차원이 다른 위기를 맞게 된다."},
+ {id:9, sec:'C', badge:'both', special:'score', q:"지금 여러분이 느끼는 AI 시대 위기감은 10점 만점에 몇 점입니까? 그 이유는?",
+  hint:"점수를 고르고 이유를 적어 주세요. 현장에서 대표님 점수와 비교합니다.",
+  ceo:"9점. 10점이라고 하면 나중에 더 큰 변화가 생겼을 때 매길 점수가 없으니까.", ceoScore:9},
+ {id:10, sec:'D', badge:'both', q:"여러분의 지점·조직에서 AX 전환의 가장 큰 병목은 무엇입니까? 기술이 아니라면 — 사람입니까, 관성입니까, 구조입니까?",
+  ceo:"고정관념이 가장 무섭다. 예를 들면 IT 지식이 많은 개발자들이 오히려 AI 활용에서 발목 잡히는 경우가 많다. 겁 없이 도전하고 덤벼보는 사람들에게 가장 유리한 세상이다. AI의 능력은 사실상 한계가 없기 때문이다."},
+ {id:11, sec:'D', badge:'both', q:'"이것만은 AI가 대체할 수 없다"고 확신하는 리더의 일은 무엇이라고 생각하십니까?',
+  ceo:"휴먼터치, 인간미. 아무리 AI가 흉내를 잘 낸다고 해도 어차피 그것은 인간으로부터 나온 것을 흉내 낸 것이다. 진짜 인간으로부터 나온 그 무언가들은 여전히 가치 있고, 귀하게 다루어질 것이다."},
+ {id:13, sec:'D', badge:'only', q:"지금까지 에듀플렉스(그리고 내 지점)를 성공시킨 방식 중, AI 시대에는 버려야 할 것이 있다면 무엇입니까?",
+  hint:"학우들이 도출하고, 대표님이 들으신 후 코멘트하는 질문입니다."},
+ {id:14, sec:'E', badge:'both', q:"구성원들이 AI를 두려워하거나 거부할 때, 리더는 어떻게 개입해야 할까요? 실제 겪은 저항의 경험(성공이든 실패든)이 있다면?",
+  ceo:"나는 IT본부가 두려워할 때, 시스템이 다운되거나 일이 잘못되면 내가 다 책임지겠으니 마음껏 그냥 하라고 이야기했다. 그런 안전감이 있어야 사람들은 움직인다."},
+ {id:15, sec:'E', badge:'both', q:'"리더가 AX에 앞장선다"는 것은 구체적으로 무엇일까요? 리더가 직접 해야 할 일과 위임해야 할 일은 어떻게 나뉠까요?',
+  ceo:"확보된 시간, 경영자의 사고력, 그리고 토큰값을 낼 돈, 노트북 하나면 얼마든지 앞장서서 보여줄 수 있다. 앉아서 펜대만 굴리고 사인이나 할 생각을 한다면 경영자가 되어서는 안 된다."},
+ {id:16, sec:'E', badge:'both', q:"AI에 대한 투자(돈·시간·사람), 여러분의 의사결정 기준은 무엇입니까? 무엇에는 쓰고, 무엇에는 쓰지 않겠습니까?",
+  ceo:"ROI 개념이다. 무조건 이익이다. 현재 한 사람의 인건비 + 토큰값과, 그 사람이 추가로 창출해낼 가치를 계산해보면 AI에 투자하는 것이 무조건 맞다."},
+ {id:17, sec:'E', badge:'only', q:'내 지점·조직에서 "내일 당장" 시작해야 할 첫 행동 하나를 꼽는다면?',
+  hint:"포럼 마무리 실천 선언으로 이어집니다. 발표가 끝나면 대표님의 답 한 가지가 공개됩니다.",
+  ceo:"뭐가 되든 좋으니, 클로드 코드로 IT 시스템이나 웹사이트 하나를 만들어보라."},
+ {id:19, sec:'F', badge:'ceo', q:'대표님의 의사결정구조를 AI로 만드는 "경영철학 탐구 TFT" 구상 — 어떻게 실현되어 갈까요? AI 고승재가 생기면 승계자는 무엇을 해야 합니까?',
+  ceo:"재료가 좋아야 한다. 그래서 지금도 몇 달째 오염된 데이터를 삭제하고, 새로운 자료들을 넣는 중이다. AI 고승재가 생기면 승계자는 잘 참고해야겠지. 맹신하면 안 된다. 세상은 다를 것이고, 승계자는 나보다 더 뛰어나야 하니까."},
+ {id:20, sec:'F', badge:'ceo', q:"에듀스퀘어 3년차, 지금 시점에서 학우들에게 바라는 것 한 가지는 무엇입니까? (하반기 전략발표회 요청 사항 포함)",
+  ceo:"다들 열심히 잘하고 계시다. 그런데, AI 시대다. 이걸 무시하면서 갈 수가 없다. 누구보다도 적극적으로 사용하고, 미래가 어떻게 변할지 고민하고, AI 활용 능력을 극대화하되, AI에게 사고력과 판단력을 빼앗기지 않는 사람이 되어주었으면 좋겠다."}
+];
+var ANSWERABLE = QUESTIONS.filter(function(x){return x.badge!=='ceo';});
+
+/* ================= 상태 ================= */
+var me = {cohort:'', name:''};
+var myAnswers = {};      // qid -> {text, score}
+var allAnswers = {};     // qid -> [{cohort,name,text,score,ts}]
+var reveals = {};        // qid -> true/false, 'ALL' -> true/false
+var demoRows = [];       // 데모 모드 저장소
+var curQ = null, curScore = null, isAdmin = false;
+var currentQid = null;   // 진행자가 브로드캐스트한 현재 문항
+var savedText = '';      // 현재 문항의 저장된 답 (dirty 판정용)
+var pollTimer = null;    // 참가자 자동 동기화 타이머
+
+/* ================= 유틸 ================= */
+function $(id){return document.getElementById(id);}
+function esc(s){var d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function toast(t){var m=$('msg');m.textContent=t;m.classList.add('show');setTimeout(function(){m.classList.remove('show');},1800);}
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function isRevealed(qid){return reveals['ALL']===true || reveals[qid]===true;}
+
+/* ================= 백엔드 ================= */
+function apiGet(cb){
+  if(!SCRIPT_URL){ cb({rows:demoRows.slice()}); return; }
+  fetch(SCRIPT_URL+'?t='+Date.now()).then(function(r){return r.json();}).then(cb)
+  .catch(function(){ toast('데이터를 불러오지 못했습니다'); cb({rows:[]}); });
+}
+function apiPost(row, cb){
+  row.ts = Date.now();
+  if(!SCRIPT_URL){ demoRows.push(row); if(cb)cb(); return; }
+  fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(row)})
+   .then(function(){ if(cb)cb(); })
+   .catch(function(){ toast('저장에 실패했습니다. 다시 시도해 주세요'); });
+}
+function rebuild(rows){
+  allAnswers = {}; reveals = {};
+  rows.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+  var latest = {};
+  rows.forEach(function(r){
+    if(r.type==='reveal'){ reveals[r.qid] = (r.text==='on'); return; }
+    if(r.type==='current'){ currentQid = r.qid==='' ? null : Number(r.qid); return; }
+    if(r.type!=='answer') return;
+    latest[r.cohort+'|'+r.name+'|'+r.qid] = r;
+  });
+  Object.keys(latest).forEach(function(k){
+    var r = latest[k];
+    if(!allAnswers[r.qid]) allAnswers[r.qid]=[];
+    allAnswers[r.qid].push(r);
+    if(r.cohort===me.cohort && r.name===me.name) myAnswers[r.qid]={text:r.text, score:r.score};
+  });
+}
+function refresh(cb){ apiGet(function(d){ myAnswers={}; rebuild(d.rows||[]); if(cb)cb(); }); }
+
+/* ================= 로그인 ================= */
+function renderCohorts(){
+  $('cohortGrid').innerHTML = COHORTS.map(function(c){
+    return '<button class="cohort-btn'+(me.cohort===c?' sel':'')+'" onclick="pickCohort(\''+c+'\')">'+c+'</button>';
+  }).join('');
+}
+function pickCohort(c){ me.cohort=c; renderCohorts(); }
+function doLogin(){
+  var n = $('nameInput').value.trim();
+  if(!me.cohort){ toast('기수를 선택해 주세요'); return; }
+  if(!n){ toast('이름을 입력해 주세요'); return; }
+  me.name = n;
+  lsSet('esq_me', JSON.stringify(me));
+  enterApp();
+}
+function enterApp(){
+  $('viewLogin').classList.add('hidden');
+  $('whoChip').textContent = me.cohort+' · '+me.name;
+  $('whoChip').classList.remove('hidden');
+  if(PAGE==='board'){
+    refresh(function(){ renderBrowse(); $('viewBrowse').classList.remove('hidden'); });
+  } else {
+    refresh(function(){ openQ((curQ&&curQ.id)||currentQid||QUESTIONS[0].id); });
+  }
+  startPoll();
+}
+/* 페이지 간 이동 */
+function nav(p){
+  if(p===PAGE) return;
+  location.href = PAGE_FILES[p];
+}
+
+/* ===== 실시간 동기화 (참가자) ===== */
+function isDirty(){
+  return $('dText').value.trim() !== (savedText||'');
+}
+function startPoll(){
+  if(pollTimer) return;
+  pollTimer = setInterval(function(){
+    refresh(function(){
+      var detailOn = !$('viewDetail').classList.contains('hidden');
+      if(detailOn && curQ){
+        // 진행자가 다른 문항으로 넘어갔고, 내가 입력 중이 아니면 자동 이동
+        if(currentQid && currentQid !== curQ.id && !isDirty()){
+          openQ(currentQid);
+          toast('▶ 진행에 맞춰 Q'+currentQid+'(으)로 이동했습니다');
+          return;
+        }
+        renderBoard();
+        updateSyncBanner();
+      }
+      if(!$('viewBrowse').classList.contains('hidden')) renderBrowse();
+      var admOn = !$('viewAdmin').classList.contains('hidden');
+      if(admOn && isAdmin && !document.getElementById('present').classList.contains('show')) renderAdmin();
+    });
+  }, 12000);
+}
+function updateSyncBanner(){
+  var show = currentQid && curQ && currentQid !== curQ.id;
+  $('syncBanner').classList.toggle('hidden', !show);
+  if(show) $('syncQLabel').textContent = 'Q'+currentQid;
+}
+function followNow(){ if(currentQid) openQ(currentQid); }
+
+/* ================= 목록 ================= */
+function gotoList(){
+  ['viewDetail','viewBrowse','viewAdmin'].forEach(function(id){ $(id).classList.add('hidden'); });
+  renderList();
+  $('viewWrite').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+/* ================= 작성 목록 ================= */
+function badgeHtml(b){
+  if(b==='both') return '<span class="badge b-both">대표님 답과 대조 ★</span>';
+  if(b==='only') return '<span class="badge b-only">학우 전용</span>';
+  return '<span class="badge b-ceo">대표님 전용 · 현장 공개</span>';
+}
+function renderList(){
+  var done = ANSWERABLE.filter(function(q){return myAnswers[q.id];}).length;
+  $('progText').textContent = '작성 진행 '+done+' / '+ANSWERABLE.length;
+  $('progBar').style.width = Math.round(done/ANSWERABLE.length*100)+'%';
+  var html = '', lastSec = '';
+  ANSWERABLE.forEach(function(q){
+    if(q.sec!==lastSec){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; lastSec=q.sec; }
+    var st = myAnswers[q.id] ? '✅' : '📝';
+    html += '<div class="q-item" onclick="openQ('+q.id+')"><span class="no">Q'+q.id+'</span><span class="qt">'+esc(q.q)+'</span><span class="st">'+st+'</span></div>';
+  });
+  $('qList').innerHTML = html;
+}
+
+/* ================= 작성 상세 ================= */
+function openQ(id){
+  curQ = QUESTIONS.find(function(q){return q.id===id;});
+  if(!curQ) return;
+  $('viewWrite').classList.add('hidden');
+  $('viewDetail').classList.remove('hidden');
+  $('dSec').textContent = SECTIONS[curQ.sec];
+  $('dQ').textContent = 'Q'+curQ.id+'. '+curQ.q;
+  $('dBadge').innerHTML = '';
+  var isCeoOnly = curQ.badge==='ceo';
+  $('dHint').textContent = isCeoOnly ? '대표님이 답하시는 질문입니다 — 인터뷰를 들으시고, 공개되면 아래에서 답변을 볼 수 있습니다.' : (curQ.hint||'');
+  $('dText').classList.toggle('hidden', isCeoOnly);
+  $('saveBtn').classList.toggle('hidden', isCeoOnly);
+  var mine = myAnswers[curQ.id];
+  $('dText').value = mine ? (mine.text||'') : '';
+  savedText = mine ? (mine.text||'') : '';
+  if(!isCeoOnly && curQ.special==='score'){
+    $('dScoreWrap').classList.remove('hidden');
+    curScore = mine && mine.score!=='' && mine.score!=null ? Number(mine.score) : null;
+    renderScore();
+    $('dText').placeholder='점수의 이유를 적어 주세요';
+  } else {
+    $('dScoreWrap').classList.add('hidden'); curScore=null;
+    $('dText').placeholder='여기에 생각을 적어 주세요';
+  }
+  var idx = QUESTIONS.indexOf(curQ);
+  $('prevBtn').disabled = idx<=0;
+  $('nextBtn').disabled = idx>=QUESTIONS.length-1;
+  $('saveBtn').textContent = mine ? '수정하여 저장하기' : '저장하기';
+  renderBoard();
+  updateSyncBanner();
+  window.scrollTo(0,0);
+}
+/* 현재 문항의 실시간 답변 보드 */
+function renderBoard(){
+  if(!curQ){ $('dBoard').innerHTML=''; return; }
+  var q = curQ, html = '';
+  if(q.badge==='ceo'){
+    html = '<div class="card">'+ceoCardHtml(q,false)+'</div>';
+  } else if(!myAnswers[q.id]){
+    html = '<div class="card"><div class="empty">🔒 나의 답변을 저장하면, 이 질문의 실시간 보드(학우들의 답'+(q.ceo?' + 대표님의 답':'')+')가 열립니다.</div></div>';
+  } else {
+    var cnt = (allAnswers[q.id]||[]).length;
+    html = '<div class="card"><div class="board-title">📡 실시간 답변 보드</div>';
+    html += ceoCardHtml(q,false);
+    html += '<div style="font-size:12.5px;font-weight:700;color:var(--sub);margin:10px 0 2px">학우 답변 '+cnt+'개</div>';
+    html += answersHtml(q,false);
+    html += '</div>';
+  }
+  $('dBoard').innerHTML = html;
+}
+function renderScore(){
+  var html='';
+  for(var i=0;i<=10;i++){
+    html += '<button class="score-btn'+(curScore===i?' sel':'')+'" onclick="pickScore('+i+')">'+i+'</button>';
+  }
+  $('scoreGrid').innerHTML = html;
+}
+function pickScore(i){ curScore=i; renderScore(); }
+function moveQ(d){
+  var idx = QUESTIONS.indexOf(curQ) + d;
+  if(idx>=0 && idx<QUESTIONS.length) openQ(QUESTIONS[idx].id);
+}
+function saveAnswer(){
+  var t = $('dText').value.trim();
+  if(curQ.special==='score' && curScore==null){ toast('점수를 선택해 주세요'); return; }
+  if(!t){ toast('내용을 입력해 주세요'); return; }
+  $('saveBtn').disabled = true;
+  apiPost({type:'answer', cohort:me.cohort, name:me.name, qid:curQ.id, text:t, score:curQ.special==='score'?curScore:''}, function(){
+    myAnswers[curQ.id] = {text:t, score:curQ.special==='score'?curScore:''};
+    savedText = t;
+    $('saveBtn').disabled = false;
+    $('saveBtn').textContent = '수정하여 저장하기';
+    toast('저장되었습니다 ✅ 아래에서 실시간 보드를 확인하세요');
+    refresh(function(){ renderBoard(); updateSyncBanner(); });
+  });
+}
+
+/* ================= 모두의 답 ================= */
+function ceoCardHtml(q, forceOpen){
+  if(!q.ceo) return '';
+  var open = forceOpen || isRevealed(q.id);
+  if(open){
+    var scoreChip = (q.ceoScore!=null)?'<span class="score-chip">'+q.ceoScore+'점</span>':'';
+    return '<div class="ceo-card"><div class="head">🎤 고승재 대표님의 답변</div><div class="body">'+scoreChip+esc(q.ceo)+'</div></div>';
+  }
+  return '<div class="ceo-card locked"><div class="head">🔒 고승재 대표님의 답변</div><div class="body">포럼 현장에서 인터뷰 진행에 맞춰 공개됩니다.</div></div>';
+}
+function distHtml(list){
+  var counts = {}, total = 0;
+  list.forEach(function(a){ if(a.score!=='' && a.score!=null){ var s=Number(a.score); counts[s]=(counts[s]||0)+1; total++; } });
+  if(!total) return '';
+  var max = Math.max.apply(null, Object.keys(counts).map(function(k){return counts[k];}));
+  var html = '<div class="dist">';
+  for(var i=10;i>=0;i--){
+    var c = counts[i]||0;
+    if(c===0) continue;
+    html += '<div class="dist-row"><span class="lab">'+i+'점</span><div class="track"><div class="fill" style="width:'+Math.round(c/max*100)+'%"></div></div><span class="cnt">'+c+'</span></div>';
+  }
+  var avg = 0, n=0;
+  list.forEach(function(a){ if(a.score!=='' && a.score!=null){ avg+=Number(a.score); n++; } });
+  html += '<div class="dist-avg">평균 <b>'+(avg/n).toFixed(1)+'점</b> · '+n+'명 응답</div></div>';
+  return html;
+}
+function answersHtml(q, showAll){
+  var list = (allAnswers[q.id]||[]).slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  if(!list.length) return '<div class="empty">아직 작성된 답변이 없습니다.</div>';
+  var html = '';
+  if(q.special==='score') html += distHtml(list);
+  list.forEach(function(a){
+    var chip = (q.special==='score' && a.score!=='' && a.score!=null)?'<span class="score-chip">'+esc(a.score)+'점</span>':'';
+    html += '<div class="ans"><div class="meta">'+esc(a.name)+' <span class="co">· '+esc(a.cohort)+'</span></div><div class="body">'+chip+esc(a.text)+'</div></div>';
+  });
+  return html;
+}
+function renderBrowse(){
+  var html = '', lastSec='';
+  QUESTIONS.forEach(function(q){
+    if(q.sec!==lastSec){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; lastSec=q.sec; }
+    html += '<div class="card"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
+    html += ceoCardHtml(q, false);
+    if(q.badge!=='ceo'){
+      var cnt = (allAnswers[q.id]||[]).length;
+      html += '<div style="font-size:12.5px;font-weight:700;color:var(--sub);margin:10px 0 2px">학우 답변 '+cnt+'개</div>';
+      html += answersHtml(q, false);
+    }
+    html += '</div>';
+  });
+  $('browseList').innerHTML = html;
+}
+
+/* ================= 관리자 ================= */
+function admLogin(){
+  if($('admPw').value !== ADMIN_PW){ toast('비밀번호가 올바르지 않습니다'); return; }
+  isAdmin = true;
+  $('admGate').classList.add('hidden');
+  refresh(renderAdmin);
+}
+function renderAdmin(){
+  $('admBody').classList.remove('hidden');
+  $('tglAll').classList.toggle('on', reveals['ALL']===true);
+  var html='';
+  QUESTIONS.forEach(function(q){
+    if(!q.ceo) return;
+    html += '<div class="adm-row"><span class="no" style="font-weight:800;color:var(--navy)">Q'+q.id+'</span><div class="qt">'+esc(q.q.length>40?q.q.slice(0,40)+'…':q.q)+'</div><div class="toggle'+(isRevealed(q.id)?' on':'')+'" onclick="toggleReveal('+q.id+')"></div></div>';
+  });
+  $('admToggles').innerHTML = html;
+  // 작성 현황
+  var people = {};
+  Object.keys(allAnswers).forEach(function(qid){
+    allAnswers[qid].forEach(function(a){
+      var k = a.cohort+'|'+a.name;
+      if(!people[k]) people[k]={cohort:a.cohort,name:a.name,cnt:0};
+      people[k].cnt++;
+    });
+  });
+  var rows = Object.keys(people).map(function(k){return people[k];});
+  rows.sort(function(a,b){ return a.cohort===b.cohort ? a.name.localeCompare(b.name) : a.cohort.localeCompare(b.cohort); });
+  if(!rows.length){ $('admStatus').innerHTML='<div class="empty">아직 작성자가 없습니다.</div>'; return; }
+  var t = '<table class="status"><tr><th>기수</th><th>이름</th><th>작성</th></tr>';
+  rows.forEach(function(r){ t += '<tr><td>'+esc(r.cohort)+'</td><td>'+esc(r.name)+'</td><td>'+r.cnt+' / '+ANSWERABLE.length+'</td></tr>'; });
+  t += '</table>';
+  $('admStatus').innerHTML = t;
+}
+function toggleReveal(qid){
+  var cur = qid==='ALL' ? reveals['ALL']===true : isRevealed(qid);
+  apiPost({type:'reveal', cohort:'', name:me.name, qid:qid, text:cur?'off':'on', score:''}, function(){
+    refresh(renderAdmin);
+    toast(qid==='ALL' ? (cur?'전체 숨김':'전체 공개') : 'Q'+qid+' '+(cur?'숨김':'공개'));
+  });
+}
+
+/* ================= 발표 모드 ================= */
+var pSlides = [], pIdx = 0, pStageN = 0, pTimer = null, pLastBroadcast = null;
+
+function buildSlides(){
+  pSlides = [{t:'title'}];
+  var last = '';
+  QUESTIONS.forEach(function(q){
+    if(q.sec !== last){ pSlides.push({t:'sec', sec:q.sec}); last = q.sec; }
+    pSlides.push({t:'q', q:q});
+  });
+  pSlides.push({t:'end'});
+}
+function enterPresent(){
+  if(!isAdmin) return;
+  buildSlides(); pIdx = 0; pStageN = 0;
+  document.getElementById('present').classList.add('show');
+  renderSlide();
+  document.addEventListener('keydown', pKeys);
+  pTimer = setInterval(function(){ refresh(function(){ renderSlide(true); }); }, 20000);
+}
+function exitPresent(){
+  document.getElementById('present').classList.remove('show');
+  document.removeEventListener('keydown', pKeys);
+  if(pTimer){ clearInterval(pTimer); pTimer = null; }
+  refresh(renderAdmin);
+}
+function pKeys(e){
+  if(e.key === 'ArrowRight'){ pMove(1); }
+  else if(e.key === 'ArrowLeft'){ pMove(-1); }
+  else if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pStage(); }
+  else if(e.key === 'r' || e.key === 'R'){ pRefresh(); }
+  else if(e.key === 'Escape'){ exitPresent(); }
+}
+function pMove(d){
+  pIdx = Math.max(0, Math.min(pSlides.length - 1, pIdx + d));
+  pStageN = 0;
+  renderSlide();
+}
+function pMaxStage(q){
+  if(q.badge === 'ceo') return 1;      // 질문 → 대표님 답변
+  return q.ceo ? 2 : 1;                // 질문 → 학우 답변 (→ 대표님 답변)
+}
+function pStage(){
+  var s = pSlides[pIdx];
+  if(s.t !== 'q'){ pMove(1); return; }
+  var max = pMaxStage(s.q);
+  if(pStageN >= max){ pMove(1); return; }
+  pStageN++;
+  var ceoNow = (s.q.badge === 'ceo' && pStageN >= 1) || pStageN >= 2;
+  if(ceoNow && s.q.ceo && !isRevealed(s.q.id)){
+    reveals[s.q.id] = true;  // 즉시 반영 + 시트 기록 → 학우 폰에도 공개
+    apiPost({type:'reveal', cohort:'', name:me.name, qid:s.q.id, text:'on', score:''});
+  }
+  renderSlide();
+}
+function pRefresh(){ refresh(function(){ renderSlide(true); }); }
+
+function pAnswersHtml(q){
+  var list = (allAnswers[q.id]||[]).slice().sort(function(a,b){
+    return a.cohort === b.cohort ? a.name.localeCompare(b.name) : a.cohort.localeCompare(b.cohort);
+  });
+  var html = '';
+  if(q.special === 'score') html += distHtml(list);
+  if(!list.length){
+    html += '<div style="opacity:.6;font-size:clamp(15px,1.6vw,20px)">아직 작성된 답변이 없습니다</div>';
+    return html;
+  }
+  html += '<div class="p-cnt-label">학우 답변 ' + list.length + '개</div><div class="p-grid">';
+  list.forEach(function(a){
+    var chip = (q.special === 'score' && a.score !== '' && a.score != null) ? '<span class="score-chip">' + esc(a.score) + '점</span> ' : '';
+    html += '<div class="p-ans"><div class="meta">' + esc(a.name) + ' · ' + esc(a.cohort) + '</div><div class="body">' + chip + esc(a.text) + '</div></div>';
+  });
+  html += '</div>';
+  return html;
+}
+function pCeoHtml(q){
+  if(!q.ceo) return '';
+  var chip = (q.ceoScore != null) ? '<span class="score-chip">' + q.ceoScore + '점</span> ' : '';
+  return '<div class="p-ceo"><div class="h">🎤 고승재 대표님의 답변</div><div class="b">' + chip + esc(q.ceo) + '</div></div>';
+}
+function renderSlide(keepScroll){
+  var s = pSlides[pIdx];
+  var body = document.getElementById('pBody');
+  var st = document.getElementById('pStageBtn');
+  var prevScroll = keepScroll ? body.scrollTop : 0;
+  document.getElementById('pCount').textContent = (pIdx + 1) + ' / ' + pSlides.length;
+  st.disabled = false;
+  if(s.t === 'title'){
+    body.innerHTML = '<div class="p-center"><div class="p-title"><span class="accent">AX</span> 그리고 <span class="accent">리더</span></div><div class="p-sub">인공지능(AI)이 만들어낸 혁신의 시대,<br>에듀플렉스 비즈니스의 AI전환 과정을 이끌어갈 리더는 무엇을 해야 하는가?</div><div class="p-sub" style="opacity:.6">EDUSQUARE 경영포럼 2026 · 고승재 대표님 인터뷰</div></div>';
+    st.textContent = '시작 →';
+  } else if(s.t === 'sec'){
+    body.innerHTML = '<div class="p-center"><div class="p-title" style="color:#3EE795">' + esc(SECTIONS[s.sec]) + '</div></div>';
+    st.textContent = '다음 →';
+  } else if(s.t === 'end'){
+    body.innerHTML = '<div class="p-center"><div class="p-title">오늘의 배움을, 각자의 현장에서 실천으로.</div><div class="p-sub">다음 만남 — 9월 20일 철학포럼 · 홍지헌 본부장님 특강</div></div>';
+    st.textContent = '끝';
+    st.disabled = true;
+  } else {
+    var q = s.q;
+    // 진행 문항 브로드캐스트 → 학우 화면이 자동으로 따라옴
+    if(pLastBroadcast !== q.id){
+      pLastBroadcast = q.id;
+      currentQid = q.id;
+      apiPost({type:'current', cohort:'', name:me.name, qid:q.id, text:'', score:''});
+    }
+    var max = pMaxStage(q);
+    var showAns = (q.badge !== 'ceo') && pStageN >= 1;
+    var showCeo = (q.badge === 'ceo' && pStageN >= 1) || pStageN >= 2;
+    var html = '<div class="p-sec">' + esc(SECTIONS[q.sec]) + '</div>';
+    html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.q) + '</div>';
+    if(showCeo) html += pCeoHtml(q);
+    if(showAns) html += pAnswersHtml(q);
+    body.innerHTML = html;
+    if(pStageN >= max){ st.textContent = '다음 질문 →'; }
+    else if(q.badge === 'ceo' || pStageN >= 1){ st.textContent = '🎤 대표님 답변 공개'; }
+    else { st.textContent = '학우 답변 보기'; }
+  }
+  body.scrollTop = prevScroll;
+}
+
+/* ================= 시작 ================= */
+(function init(){
+  if(!SCRIPT_URL) $('demoBanner').classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.page===PAGE); });
+  var saved = lsGet('esq_me'), m = null;
+  if(saved){ try{ m = JSON.parse(saved); }catch(e){} }
+  if(PAGE === 'admin'){
+    // 진행자 페이지: 기수 로그인 생략, 바로 비밀번호 게이트
+    me = (m && m.cohort && m.name) ? m : {cohort:'운영팀', name:'진행자'};
+    if(m && m.name){ $('whoChip').textContent = me.cohort+' · '+me.name; $('whoChip').classList.remove('hidden'); }
+    $('viewLogin').classList.add('hidden');
+    $('viewAdmin').classList.remove('hidden');
+    startPoll();
+    return;
+  }
+  renderCohorts();
+  if(m && m.cohort && m.name){ me = m; enterApp(); return; }
+})();
+</script>
+</body>
+</html>
