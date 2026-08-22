@@ -248,7 +248,7 @@
 
 <script>
 /* ================= 설정 ================= */
-var PAGE = 'board';   // 이 파일의 역할: live=포럼 참여 / board=모두의 답 / admin=진행자
+var PAGE = 'live';   // 이 파일의 역할: live=포럼 참여 / board=모두의 답 / admin=진행자
 var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html' };
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuuhoVY27FU-i-8yRI8UB2OuFzPoteRJ5kU0B_htmYl4bQbv76yJfmpc7Pry-_LdQTOQ/exec';
 var ADMIN_PW   = 'edu2026';     // ← 진행자(학장) 비밀번호
@@ -738,6 +738,8 @@ function renderSlide(keepScroll){
 /* ================= 시작 ================= */
 (function init(){
   if(!SCRIPT_URL) $('demoBanner').classList.remove('hidden');
+  // 탭은 진행자 페이지에서만 표시 (학우 참여 페이지·모두의 답 페이지는 단일 화면)
+  $('tabs').classList.toggle('hidden', PAGE!=='admin');
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.page===PAGE); });
   var saved = lsGet('esq_me'), m = null;
   if(saved){ try{ m = JSON.parse(saved); }catch(e){} }
