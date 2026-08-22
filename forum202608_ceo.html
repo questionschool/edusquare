@@ -50,6 +50,10 @@
   .b-both{background:var(--gold-bg);color:var(--mint)}
   .b-only{background:var(--green-bg);color:var(--mint)}
   .b-ceo{background:var(--navy-bg);color:var(--blue)}
+  .b-only2{background:rgba(79,169,232,.14);color:#4FA9E8}
+  .b-ceoonly{background:rgba(245,193,105,.15);color:#F5C169}
+  .b-skip{background:rgba(255,255,255,.08);color:#8FA6BC}
+  .card.skip{opacity:.55}
   .prog{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13.5px}
   .prog .bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:8px;overflow:hidden}
   .prog .bar>div{height:100%;background:linear-gradient(90deg,var(--mint-deep),var(--mint));border-radius:4px;transition:width .3s}
@@ -313,6 +317,11 @@ var QUESTIONS = [
   ceo:"다들 열심히 잘하고 계시다. 그런데, AI 시대다. 이걸 무시하면서 갈 수가 없다. 누구보다도 적극적으로 사용하고, 미래가 어떻게 변할지 고민하고, AI 활용 능력을 극대화하되, AI에게 사고력과 판단력을 빼앗기지 않는 사람이 되어주었으면 좋겠다."}
 ];
 var ANSWERABLE = QUESTIONS.filter(function(x){return x.badge!=='ceo';});
+/* 이번 포럼에서 다루지 않기로 한 질문 (대표님 페이지에서만 표시) */
+var EXCLUDED = [
+ {id:12, sec:'D', q:'지난 철학포럼에서 "AI 시대에는 조변석개를 두려워하지 않는 리더가 살아남는다"고 하셨습니다. 그렇다면 원칙(철학)과 조변석개(유연함)는 어떻게 공존합니까?'},
+ {id:18, sec:'F', q:'AI 시대의 승계자에게 요구되는 역량은, 대표님이 창업하시던 시절과 무엇이 다릅니까?'}
+];
 
 /* ================= 상태 ================= */
 var me = {cohort:'', name:''};
@@ -647,17 +656,35 @@ function ceoLogin(){
   $('ceoGate').classList.add('hidden');
   refresh(renderCeo);
 }
+function ceoKindBadge(q){
+  if(q.excluded) return '<span class="badge b-skip">다루지 않음</span>';
+  if(q.badge==='ceo') return '<span class="badge b-ceoonly">대표님만 답변</span>';
+  if(q.badge==='only') return '<span class="badge b-only2">학우만 답변</span>';
+  return '<span class="badge b-both">모두 답변</span>';
+}
 function renderCeo(){
   $('ceoBody').classList.remove('hidden');
-  var html = '<div class="note">질문별로 답변을 수정하고 저장하면, 즉시 모든 화면(학우 참여·모두의 답·발표 화면)에 반영됩니다. 아직 공개 전인 답변은 학우들에게 보이지 않으며, 포럼 진행에 맞춰 공개됩니다.</div>';
+  var html = '<div class="note">질문별로 답변을 수정하고 저장하면, 즉시 모든 화면(학우 참여·모두의 답·발표 화면)에 반영됩니다. 아직 공개 전인 답변은 학우들에게 보이지 않으며, 포럼 진행에 맞춰 공개됩니다.<br><br>'
+    + '<span class="badge b-ceoonly">대표님만 답변</span> 인터뷰에서 대표님만 답하는 질문 &nbsp;'
+    + '<span class="badge b-both">모두 답변</span> 학우들도 같은 질문에 답해 현장에서 대조 &nbsp;'
+    + '<span class="badge b-only2">학우만 답변</span> 학우들이 답하고 대표님은 코멘트 &nbsp;'
+    + '<span class="badge b-skip">다루지 않음</span> 이번 포럼에서 제외된 질문</div>';
+  var items = QUESTIONS.concat(EXCLUDED.map(function(x){ x.excluded = true; return x; }))
+    .slice().sort(function(a,b){ return a.id - b.id; });
   var last = '';
-  QUESTIONS.forEach(function(q){
+  items.forEach(function(q){
     if(q.sec !== last){ html += '<div class="sec-title">'+SECTIONS[q.sec]+'</div>'; last = q.sec; }
+    if(q.excluded){
+      html += '<div class="card skip"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
+      html += '<div style="margin:4px 0 2px">'+ceoKindBadge(q)+'</div>';
+      html += '<div class="hint" style="margin:6px 0 0">이번 포럼에서는 다루지 않기로 한 질문입니다.</div></div>';
+      return;
+    }
     var c = ceoOf(q);
     var status = c ? (isRevealed(q.id) ? '<span class="badge b-both">공개됨</span>' : '<span class="badge b-ceo">공개 전</span>')
                    : '<span class="badge b-ceo">답변 없음 — 작성하면 공개 대상에 추가됩니다</span>';
     html += '<div class="card"><div class="q-full" style="font-size:14.5px">Q'+q.id+'. '+esc(q.q)+'</div>';
-    html += '<div style="margin:4px 0 8px">'+status+'</div>';
+    html += '<div style="margin:4px 0 8px">'+ceoKindBadge(q)+' '+status+'</div>';
     if(q.special === 'score'){
       var sc = c && c.score!=null ? c.score : null;
       html += '<div class="score-grid" id="ceoG'+q.id+'" data-score="'+(sc==null?'':sc)+'">';
