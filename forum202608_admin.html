@@ -168,6 +168,14 @@
   .cs-arrows{width:min(60vw,720px);height:auto;opacity:.8}
   .cs-boxes{display:flex;gap:1.6vw;justify-content:center;width:min(84vw,1100px)}
   .cs-boxes>div{flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:4.5vh .5vw;font-size:clamp(36px,5.5vw,80px);font-weight:800;color:#3EE795}
+  /* 변화 매트릭스 */
+  .cm-grid{display:grid;grid-template-columns:minmax(110px,.65fr) 1fr 1fr;gap:8px;width:min(88vw,1060px)}
+  .cm-h{background:rgba(62,231,149,.18);color:#3EE795;font-weight:800;font-size:clamp(20px,2.6vw,34px);border-radius:10px;padding:.8vh 0;text-align:center}
+  .cm-r{display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(255,255,255,.07);border-radius:10px;font-weight:800;font-size:clamp(13px,1.6vw,21px);padding:1vh .5vw;text-align:center;line-height:1.35}
+  .cm-r small{font-weight:600;color:#8FA6BC;font-size:.75em}
+  .cm-cell{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:1.6vh 1.2vw;font-size:clamp(12.5px,1.5vw,20px);line-height:1.5;text-align:left}
+  .cm-cell b{color:#3EE795}
+  .cm-emoji{font-size:clamp(22px,2.8vw,38px);display:block;margin-bottom:.4vh}
 </style>
 </head>
 <body>
@@ -950,6 +958,21 @@ var CUSTOM_SLIDES = [
     + '<div style="font-size:clamp(16px,2vw,28px);color:#C8D8EA;font-style:italic;max-width:min(82vw,920px);line-height:1.6">"I almost never get the question:<br>\'What\'s not going to change in the next 10 years?\'"</div>'
     + '<div style="font-size:clamp(13px,1.5vw,20px);color:#8FA6BC">— 제프 베조스 (Jeff Bezos), Amazon 창업자 · 2007 HBR 인터뷰</div>'
     + '<div style="font-size:clamp(14px,1.7vw,24px);color:#E9F3F7;max-width:min(80vw,900px);line-height:1.7;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:2.5vh 2.5vw;text-align:left">사람들은 "10년 후 무엇이 <b>변할까</b>?"는 자주 묻지만, "무엇이 <b>변하지 않을까</b>?"는 거의 묻지 않습니다. 그러나 사업 전략은 시간이 지나도 변하지 않는 것 위에 세울 수 있습니다. 아마존의 고객은 10년 뒤에도 낮은 가격, 빠른 배송, 다양한 선택을 원할 것입니다. <span style="color:#3EE795;font-weight:700">오랜 시간이 흘러도 변하지 않는 사실을 안다면, 거기에는 큰 투자와 노력을 해도 좋습니다.</span></div>'
+    + '</div>' },
+  { at:{afterSec:'C'}, html:
+    '<div class="cs-center" style="gap:2.2vh">'
+    + '<div class="p-title" style="font-size:clamp(24px,3.3vw,48px)">변화에 대한 <span class="accent">저항</span> 뛰어넘기</div>'
+    + '<div style="font-size:clamp(13px,1.5vw,20px);color:#8FA6BC">엘리 골드랫(Eliyahu M. Goldratt) · 제약이론(TOC)의 변화 매트릭스 (Change Matrix)</div>'
+    + '<div class="cm-grid">'
+    +   '<div></div><div class="cm-h">＋</div><div class="cm-h">－</div>'
+    +   '<div class="cm-r">변화한다<br><small>Change</small></div>'
+    +   '<div class="cm-cell"><span class="cm-emoji">💰</span><b>황금단지</b> — 산을 오를 가치가 있다.<br>변화가 가져다줄 이득.</div>'
+    +   '<div class="cm-cell"><span class="cm-emoji">🩼</span><b>목발</b> — 오르다 다칠 수 있다.<br>변화에 따르는 위험과 비용.</div>'
+    +   '<div class="cm-r">변화하지 않는다<br><small>Don\'t Change</small></div>'
+    +   '<div class="cm-cell"><span class="cm-emoji">🧜‍♀️</span><b>인어</b> — 지금 누리는 달콤함.<br>변하면 잃을까 두려운 것.</div>'
+    +   '<div class="cm-cell"><span class="cm-emoji">🐊</span><b>악어</b> — 제자리에 있으면 물린다.<br>변하지 않을 때 닥칠 위험.</div>'
+    + '</div>'
+    + '<div style="font-size:clamp(13px,1.6vw,22px);color:#E9F3F7;max-width:min(84vw,1000px);line-height:1.65;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:1.8vh 2vw">저항은 어리석음이 아니라 <b style="color:#3EE795">네 칸의 합리적인 계산</b>입니다. 리더는 황금단지(💰)와 악어(🐊)만 말하기 쉽지만, 구성원이 붙잡고 있는 인어(🧜‍♀️)와 두려워하는 목발(🩼)까지 다뤄줄 때 비로소 변화가 시작됩니다.</div>'
     + '</div>' },
 ];
 
