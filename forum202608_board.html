@@ -176,6 +176,9 @@
   .cm-cell{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:1.6vh 1.2vw;font-size:clamp(12.5px,1.5vw,20px);line-height:1.5;text-align:left}
   .cm-cell b{color:#3EE795}
   .cm-emoji{font-size:clamp(22px,2.8vw,38px);display:block;margin-bottom:.4vh}
+  /* 글라이처 공식 */
+  .gl-row{display:flex;align-items:center;gap:1.2vw;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:1.2vh 1.5vw;font-size:clamp(13px,1.7vw,23px);line-height:1.5}
+  .gl-row>b{color:#3EE795;font-size:clamp(20px,2.6vw,36px);width:1.4em;text-align:center;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -976,6 +979,19 @@ var CUSTOM_SLIDES = [
     +   '<div class="cm-cell"><span class="cm-emoji">🐊</span><b>악어</b> — 제자리에 있으면 물린다.<br>변하지 않을 때 닥칠 위험.</div>'
     + '</div>'
     + '<div style="font-size:clamp(13px,1.6vw,22px);color:#E9F3F7;max-width:min(84vw,1000px);line-height:1.65;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:1.8vh 2vw">저항은 어리석음이 아니라 <b style="color:#3EE795">네 칸의 합리적인 계산</b>입니다. 리더는 황금단지(💰)와 악어(🐊)만 말하기 쉽지만, 구성원이 붙잡고 있는 인어(🧜‍♀️)와 두려워하는 목발(🩼)까지 다뤄줄 때 비로소 변화가 시작됩니다.</div>'
+    + '</div>' },
+  { at:{afterSec:'D'}, html:
+    '<div class="cs-center" style="gap:2.2vh">'
+    + '<div class="p-title" style="font-size:clamp(24px,3.3vw,48px)">변화 성공 <span class="accent">방정식</span></div>'
+    + '<div style="font-size:clamp(13px,1.5vw,20px);color:#8FA6BC">글라이처 공식 (Gleicher\'s Formula) · by David Gleicher &amp; Richard Beckhard</div>'
+    + '<div style="font-size:clamp(40px,6.5vw,96px);font-weight:800;color:#3EE795;letter-spacing:.06em;margin:.5vh 0">D × V × F &gt; R</div>'
+    + '<div style="display:flex;flex-direction:column;gap:1vh;width:min(80vw,860px);text-align:left">'
+    +   '<div class="gl-row"><b>D</b><span><b style="color:#3EE795">현재에 대한 불만족</b> (Dissatisfaction) — 이대로는 안 된다는 절박함</span></div>'
+    +   '<div class="gl-row"><b>V</b><span><b style="color:#3EE795">가능성 있는 비전</b> (Vision) — 변화 너머의 매력적인 그림</span></div>'
+    +   '<div class="gl-row"><b>F</b><span><b style="color:#3EE795">굳건하고 현실적인 첫걸음</b> (First steps) — 당장 시작할 수 있는 행동</span></div>'
+    +   '<div class="gl-row"><b>R</b><span><b style="color:#3EE795">저항</b> (Resistance) — 변화를 가로막는 힘</span></div>'
+    + '</div>'
+    + '<div style="font-size:clamp(13px,1.6vw,22px);color:#E9F3F7;max-width:min(84vw,1000px);line-height:1.65;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:1.8vh 2vw">세 요소는 덧셈이 아니라 <b style="color:#3EE795">곱셈</b>입니다 — 하나라도 0이면 좌변 전체가 0이 되어 저항을 넘지 못합니다. 앞의 매트릭스와 겹쳐 보면, 악어를 보게 하는 것이 D, 황금단지를 보여주는 것이 V, 목발을 치워주는 것이 F입니다.</div>'
     + '</div>' },
 ];
 
