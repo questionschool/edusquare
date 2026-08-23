@@ -211,7 +211,7 @@
       <div id="dBadge" style="margin-bottom:6px"></div>
       <div class="hint" id="dHint"></div>
       <div id="dScoreWrap" class="hidden">
-        <div style="font-size:13.5px;font-weight:700;margin-bottom:2px">나의 위기감 점수 (0~10)</div>
+        <div style="font-size:13.5px;font-weight:700;margin-bottom:2px" id="dScoreLabel">나의 위기감 점수 (0~10)</div>
         <div class="score-grid" id="scoreGrid"></div>
       </div>
       <textarea id="dText" placeholder="여기에 생각을 적어 주세요"></textarea>
@@ -329,11 +329,12 @@ var QUESTIONS = [
  {id:2, sec:'A', badge:'both', q:"여러분은 AI를 어떻게 배우고 계십니까? 나만의 AI 공부법을 소개해주세요.",
   ceo:"크게 3가지 방법이 있다. 첫째, AI 자체가 이미 답을 다 알고 있다 — 내가 어떻게 질문하느냐에 따라 답이 나오기 때문에, AI와의 질문답변 과정에서 가장 많이 배운다. 둘째, 유튜브 — 조코딩·코드팩토리 같은 영상은 거의 다 챙겨 본다. 셋째, IT본부 직원분들과의 교류 — 해커톤이나 회의에서 많은 것을 배운다."},
  {id:3, sec:'A', badge:'both', q:"에듀플렉스에서 앞으로 AI를 활용해 꼭 도전해보면 좋겠다고 생각하는 실험이 있다면 무엇입니까?",
-  hint:"대표님은 '지금 진행 중인 실험 중 가장 기대되는 것'에 답하십니다 — 현재와 미래를 대조합니다.",
+  hint:"대표님께서는 '지금 진행 중인 실험 중 가장 기대되는 것'에 답하셨습니다.",
   ceo:"(지금 실험 중 가장 기대되는 것) CUBION이다. educube는 그것을 담는 그릇이다. 가장 아쉬운 것은 속도 — 더 빨리 하고 싶다."},
  {id:4, sec:'B', badge:'both', q:"교육사업 영역에서 10년 후에도 바뀌지 않을 것은 무엇일까요?",
   ceo:"스스로 생각하는 능력, 스스로 해내는 능력의 중요성은 10년 후에 바뀌기는커녕 더 중요해질 것이다. 이 능력이 더 귀해지는 시대가 오고 있다."},
- {id:5, sec:'B', badge:'ceo', q:"AI가 다 가르쳐주는 시대, 자기주도학습(에듀플렉스 모델)의 가치는 커집니까, 작아집니까?",
+ {id:5, sec:'B', badge:'both', special:'choice', options:['커진다','작아진다'], q:"AI가 다 가르쳐주는 시대, 자기주도학습(에듀플렉스 모델)의 가치는 커집니까, 작아집니까?",
+  hint:"둘 중 하나를 선택해 주세요. 대표님의 답변은 현장에서 공개됩니다.",
   ceo:"훨씬 더 커진다. 학부모들은 자녀가 AI에 휘둘리지 않는 사고력과 판단력, 논리력을 키우길 기대할 것이다. 그러려면 방주(Ark) 교육이 필요하다 — 일정 기간 AI를 단절시키고, 순전히 자신의 힘으로만 학습하고 문제를 해결하는 환경을 만들 필요가 있다. 이런 교육들이 각광받을 것이라 생각한다."},
  {id:6, sec:'B', badge:'only', q:"현장에서 학생·학부모가 AI로 달라졌다고 체감하시는 변화가 있습니까?",
   hint:"현장에 있는 여러분만 답할 수 있는 질문입니다 — 고객 관점의 변화 신호."},
@@ -404,7 +405,7 @@ var allAnswers = {};     // qid -> [{cohort,name,text,score,ts}]
 var reveals = {};        // qid -> true/false, 'ALL' -> true/false
 var ceoEdits = {};       // qid -> {text, score} — 대표님이 직접 수정한 답변 (내장 답변보다 우선)
 var demoRows = [];       // 데모 모드 저장소
-var curQ = null, curScore = null, isAdmin = false;
+var curQ = null, curScore = null, curChoice = null, isAdmin = false;
 var currentQid = null;   // 진행자가 브로드캐스트한 현재 문항
 var autoFollowOn = true; // 학우 화면 자동 이동 (어드민 토글, 시트로 공유)
 var savedText = '';      // 현재 문항의 저장된 답 (dirty 판정용)
@@ -576,11 +577,21 @@ function openQ(id){
   savedText = mine ? (mine.text||'') : '';
   if(!isCeoOnly && curQ.special==='score'){
     $('dScoreWrap').classList.remove('hidden');
+    $('dScoreLabel').textContent = '나의 위기감 점수 (0~10)';
+    $('scoreGrid').style.gridTemplateColumns = '';
     curScore = mine && mine.score!=='' && mine.score!=null ? Number(mine.score) : null;
     renderScore();
     $('dText').placeholder='점수의 이유를 적어 주세요';
+  } else if(!isCeoOnly && curQ.special==='choice'){
+    $('dScoreWrap').classList.remove('hidden');
+    $('dScoreLabel').textContent = '나의 선택';
+    $('scoreGrid').style.gridTemplateColumns = 'repeat(' + curQ.options.length + ',1fr)';
+    curChoice = mine ? (mine.text||null) : null;
+    renderChoice();
+    $('dText').classList.add('hidden');   // 선택형은 버튼만
   } else {
-    $('dScoreWrap').classList.add('hidden'); curScore=null;
+    $('dScoreWrap').classList.add('hidden'); curScore=null; curChoice=null;
+    $('scoreGrid').style.gridTemplateColumns = '';
     $('dText').placeholder='여기에 생각을 적어 주세요';
   }
   var seq = activeQs();
@@ -618,15 +629,27 @@ function renderScore(){
   $('scoreGrid').innerHTML = html;
 }
 function pickScore(i){ curScore=i; renderScore(); }
+function renderChoice(){
+  $('scoreGrid').innerHTML = curQ.options.map(function(opt){
+    return '<button class="score-btn'+(curChoice===opt?' sel':'')+'" onclick="pickChoice(\''+opt+'\')">'+opt+'</button>';
+  }).join('');
+}
+function pickChoice(opt){ curChoice=opt; renderChoice(); }
 function moveQ(d){
   var seq = activeQs();
   var idx = seq.indexOf(curQ) + d;
   if(idx>=0 && idx<seq.length) openQ(seq[idx].id);
 }
 function saveAnswer(){
-  var t = $('dText').value.trim();
-  if(curQ.special==='score' && curScore==null){ toast('점수를 선택해 주세요'); return; }
-  if(!t){ toast('내용을 입력해 주세요'); return; }
+  var t;
+  if(curQ.special==='choice'){
+    if(!curChoice){ toast('하나를 선택해 주세요'); return; }
+    t = curChoice;
+  } else {
+    t = $('dText').value.trim();
+    if(curQ.special==='score' && curScore==null){ toast('점수를 선택해 주세요'); return; }
+    if(!t){ toast('내용을 입력해 주세요'); return; }
+  }
   $('saveBtn').disabled = true;
   apiPost({type:'answer', cohort:me.cohort, name:me.name, qid:curQ.id, text:t, score:curQ.special==='score'?curScore:''}, function(){
     myAnswers[curQ.id] = {text:t, score:curQ.special==='score'?curScore:''};
@@ -673,11 +696,32 @@ function distHtml(list){
   html += '<div class="dist-avg">평균 <b>'+(avg/n).toFixed(1)+'점</b> · '+n+'명 응답</div></div>';
   return html;
 }
+/* 선택형(A/B) 집계 — 항목별 퍼센트 바 */
+function choiceDistHtml(q, list){
+  var counts = {}, total = 0;
+  q.options.forEach(function(o){ counts[o] = 0; });
+  list.forEach(function(a){ if(counts[a.text] != null){ counts[a.text]++; total++; } });
+  if(!total) return '';
+  var html = '<div class="dist">';
+  q.options.forEach(function(o){
+    var pct = Math.round(counts[o] / total * 100);
+    html += '<div class="dist-row"><span class="lab" style="width:64px">'+esc(o)+'</span><div class="track"><div class="fill" style="width:'+pct+'%"></div></div><span class="cnt" style="width:86px">'+pct+'% ('+counts[o]+'명)</span></div>';
+  });
+  html += '<div class="dist-avg">'+total+'명 응답</div></div>';
+  return html;
+}
 function answersHtml(q, showAll){
   var list = (allAnswers[q.id]||[]).slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
   if(!list.length) return '<div class="empty">아직 작성된 답변이 없습니다.</div>';
   var html = '';
   if(q.special==='score') html += distHtml(list);
+  if(q.special==='choice'){
+    html += choiceDistHtml(q, list);
+    list.forEach(function(a){
+      html += '<div class="ans"><div class="meta">'+esc(a.name)+' <span class="co">· '+esc(a.cohort)+'</span></div><div class="body"><span class="score-chip">'+esc(a.text)+'</span></div></div>';
+    });
+    return html;
+  }
   list.forEach(function(a){
     var chip = (q.special==='score' && a.score!=='' && a.score!=null)?'<span class="score-chip">'+esc(a.score)+'점</span>':'';
     html += '<div class="ans"><div class="meta">'+esc(a.name)+' <span class="co">· '+esc(a.cohort)+'</span></div><div class="body">'+chip+esc(a.text)+'</div></div>';
@@ -929,14 +973,21 @@ function pAnswersHtml(q){
   pAnsList = list;
   var html = '';
   if(q.special === 'score') html += distHtml(list);
+  if(q.special === 'choice') html += choiceDistHtml(q, list);
   if(!list.length){
     html += '<div style="opacity:.6;font-size:clamp(15px,1.6vw,20px)">아직 작성된 답변이 없습니다</div>';
     return html;
   }
   html += '<div class="p-cnt-label">학우 답변 ' + list.length + '개 — 카드를 클릭하면 크게 보입니다</div><div class="p-grid">';
   list.forEach(function(a, i){
-    var chip = (q.special === 'score' && a.score !== '' && a.score != null) ? '<span class="score-chip">' + esc(a.score) + '점</span> ' : '';
-    html += '<div class="p-ans" onclick="pSpotlight(' + i + ')"><div class="meta">' + esc(a.name) + ' · ' + esc(a.cohort) + '</div><div class="body">' + chip + esc(a.text) + '</div></div>';
+    var body;
+    if(q.special === 'choice'){
+      body = '<span class="score-chip">' + esc(a.text) + '</span>';
+    } else {
+      var chip = (q.special === 'score' && a.score !== '' && a.score != null) ? '<span class="score-chip">' + esc(a.score) + '점</span> ' : '';
+      body = chip + esc(a.text);
+    }
+    html += '<div class="p-ans" onclick="pSpotlight(' + i + ')"><div class="meta">' + esc(a.name) + ' · ' + esc(a.cohort) + '</div><div class="body">' + body + '</div></div>';
   });
   html += '</div>';
   return html;
