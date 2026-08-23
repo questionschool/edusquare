@@ -336,7 +336,7 @@
 <script>
 /* ================= 설정 ================= */
 var PAGE = 'admin';   // 이 파일의 역할: live=포럼 참여 / board=모두의 답 / admin=진행자
-var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html', ceo:'forum202608_ceo.html' };
+var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html', ceo:'forum202608_ceo.html', show:'forum202608_show.html' };
 var CEO_PW = 'ceo2026';        // ← 대표님 전용 페이지 비밀번호
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuuhoVY27FU-i-8yRI8UB2OuFzPoteRJ5kU0B_htmYl4bQbv76yJfmpc7Pry-_LdQTOQ/exec';
 var ADMIN_PW   = 'edu2026';     // ← 진행자(학장) 비밀번호
@@ -1021,6 +1021,7 @@ function enterPresent(){
   pTimer = setInterval(function(){ refresh(function(){ renderSlide(true); }); }, 20000);
 }
 function exitPresent(){
+  if(PAGE === 'show'){ location.reload(); return; }   // 발표 전용 페이지: 종료 시 처음부터 재시작
   document.getElementById('present').classList.remove('show');
   document.removeEventListener('keydown', pKeys);
   if(pTimer){ clearInterval(pTimer); pTimer = null; }
@@ -1192,6 +1193,14 @@ function renderSlide(keepScroll){
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.page===PAGE); });
   var saved = lsGet('esq_me'), m = null;
   if(saved){ try{ m = JSON.parse(saved); }catch(e){} }
+  if(PAGE === 'show'){
+    // 발표 전용 페이지: 비밀번호 없이 바로 발표 모드로
+    me = {cohort:'운영팀', name:'진행자'};
+    isAdmin = true;
+    $('viewLogin').classList.add('hidden');
+    refresh(function(){ enterPresent(); });
+    return;
+  }
   if(PAGE === 'ceo'){
     // 대표님 전용 페이지: 로그인 생략, 비밀번호 게이트
     me = {cohort:'', name:'대표님'};
