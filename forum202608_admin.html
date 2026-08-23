@@ -97,6 +97,9 @@
   table.status th{background:var(--gold-bg);color:var(--mint)}
   .msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--mint);color:var(--mint-ink);padding:10px 22px;border-radius:22px;font-size:14px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.4)}
   .msg.show{opacity:1}
+  .nav-guard{position:fixed;inset:0;background:rgba(4,12,22,.72);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px}
+  .nav-guard .card{max-width:420px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+  .nav-guard .btn{margin-top:8px}
   .sync-banner{background:var(--mint);color:var(--mint-ink);border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:800;text-align:center;margin-bottom:10px;cursor:pointer;animation:pulse 1.6s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.75}}
   .board-title{font-weight:800;font-size:14px;color:var(--mint);margin-bottom:6px}
@@ -306,6 +309,17 @@
   </div>
 </div>
 
+<!-- 미저장 이동 가드 -->
+<div class="nav-guard hidden" id="navGuard">
+  <div class="card">
+    <div class="q-full">작성한 의견을 저장하고 넘어갈까요?</div>
+    <div class="hint">저장하지 않고 이동하면 지금 작성한 내용이 사라집니다.</div>
+    <button class="btn" onclick="navGuardSave()">✅ 저장하고 이동</button>
+    <button class="btn ghost" onclick="navGuardDiscard()">저장하지 않고 이동</button>
+    <button class="btn ghost" onclick="navGuardStay()">계속 작성하기</button>
+  </div>
+</div>
+
 <div class="msg" id="msg"></div>
 
 <script>
@@ -501,7 +515,36 @@ function nav(p){
 
 /* ===== 실시간 동기화 (참가자) ===== */
 function isDirty(){
+  if(!curQ) return false;
+  if(curQ.special==='choice') return (curChoice||'') !== (savedText||'');
   return $('dText').value.trim() !== (savedText||'');
+}
+/* 미저장 이동 가드 */
+var pendingNav = null;
+function guardNav(fn){
+  var detailOn = !$('viewDetail').classList.contains('hidden');
+  if(detailOn && curQ && isDirty()){
+    pendingNav = fn;
+    $('navGuard').classList.remove('hidden');
+  } else {
+    fn();
+  }
+}
+function navGuardSave(){
+  $('navGuard').classList.add('hidden');
+  saveAnswer(function(){
+    var f = pendingNav; pendingNav = null;
+    if(f) setTimeout(f, 300);
+  });
+}
+function navGuardDiscard(){
+  $('navGuard').classList.add('hidden');
+  var f = pendingNav; pendingNav = null;
+  if(f) f();
+}
+function navGuardStay(){
+  $('navGuard').classList.add('hidden');
+  pendingNav = null;
 }
 function startPoll(){
   if(pollTimer) return;
@@ -533,10 +576,12 @@ function followNow(){ if(currentQid) openQ(currentQid); }
 
 /* ================= 목록 ================= */
 function gotoList(){
-  ['viewDetail','viewBrowse','viewAdmin'].forEach(function(id){ $(id).classList.add('hidden'); });
-  renderList();
-  $('viewWrite').classList.remove('hidden');
-  window.scrollTo(0,0);
+  guardNav(function(){
+    ['viewDetail','viewBrowse','viewAdmin'].forEach(function(id){ $(id).classList.add('hidden'); });
+    renderList();
+    $('viewWrite').classList.remove('hidden');
+    window.scrollTo(0,0);
+  });
 }
 
 /* ================= 작성 목록 ================= */
@@ -636,11 +681,14 @@ function renderChoice(){
 }
 function pickChoice(opt){ curChoice=opt; renderChoice(); }
 function moveQ(d){
-  var seq = activeQs();
-  var idx = seq.indexOf(curQ) + d;
-  if(idx>=0 && idx<seq.length) openQ(seq[idx].id);
+  guardNav(function(){
+    var seq = activeQs();
+    var idx = seq.indexOf(curQ) + d;
+    if(idx>=0 && idx<seq.length) openQ(seq[idx].id);
+  });
 }
-function saveAnswer(){
+function saveAnswer(cb){
+  if(typeof cb !== 'function') cb = null;   // onclick 이벤트 객체 방지
   var t;
   if(curQ.special==='choice'){
     if(!curChoice){ toast('하나를 선택해 주세요'); return; }
@@ -658,6 +706,7 @@ function saveAnswer(){
     $('saveBtn').textContent = '수정하여 저장하기';
     toast('저장되었습니다 ✅ 아래에서 실시간 보드를 확인하세요');
     refresh(function(){ renderBoard(); updateSyncBanner(); });
+    if(cb) cb();
   });
 }
 
