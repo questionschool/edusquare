@@ -329,7 +329,7 @@
       <div class="card">
         <div class="q-full" style="margin-bottom:8px">대표님 답변 공개 토글</div>
         <div class="adm-row" style="border-top:none;background:var(--gold-bg);border-radius:8px;padding:10px">
-          <div class="qt"><b>전체 일괄 공개</b></div>
+          <div class="qt"><b>전체 일괄 공개</b><div class="hint" style="margin:3px 0 0">발표 화면은 아래 질문별 토글로 공개됩니다. 학우 폰·모두의 답 페이지에는 이 스위치를 켰을 때만 대표님 답변이 보입니다 (포럼 종료 후 켜세요).</div></div>
           <div class="toggle" id="tglAll" onclick="toggleReveal('ALL')"></div>
         </div>
         <div id="admToggles"></div>
@@ -815,7 +815,8 @@ function ceoOf(q){
 function ceoCardHtml(q, forceOpen){
   var c = ceoOf(q);
   if(!c) return '';
-  var open = forceOpen || isRevealed(q.id);
+  // 웹 페이지에서는 질문별 공개(발표 화면용)와 무관하게, '전체 일괄 공개' 스위치가 켜졌을 때만 오픈
+  var open = forceOpen || reveals['ALL'] === true;
   if(open){
     var scoreChip = (c.score!=null)?'<span class="score-chip">'+c.score+'점</span>':'';
     return '<div class="ceo-card"><div class="head">🎤 고승재 대표님의 답변</div><div class="body">'+scoreChip+esc(c.text)+'</div></div>';
