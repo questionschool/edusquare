@@ -120,6 +120,7 @@
   .p-sec{font-size:clamp(14px,1.6vw,20px);font-weight:800;color:#3EE795;letter-spacing:.5px;margin-bottom:1.2vh}
   .p-qnum{color:#3EE795;margin-right:.45em}
   .p-q{font-size:clamp(22px,3vw,42px);font-weight:800;line-height:1.4;margin-bottom:2.5vh;word-break:keep-all}
+  .p-qsub{font-size:clamp(16px,2vw,29px);font-weight:700;color:#3EE795;line-height:1.5;margin:-1.2vh 0 2.5vh;word-break:keep-all}
   .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding-bottom:2vh}
   .p-ans{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:13px 15px}
   .p-ans .meta{font-size:clamp(12px,1.1vw,15px);font-weight:800;color:#7FD0F5;margin-bottom:4px}
@@ -299,6 +300,8 @@ var COHORTS = ['1기','2기','3기','운영팀'];
 var SECTIONS = {A:'A. X = Transformation : 전환점 혹은 교차로', B:'B. 교육 사업의 본질', C:'C. Why Change — 왜 변해야 하는가', D:'D. What to Change — 무엇을 바꿔야 하는가', E:'E. How to Change — 리더는 어떻게 이끄는가', F:'F. 승계와 에듀스퀘어'};
 var QUESTIONS = [
  {id:1, sec:'A', badge:'both', q:"여러분의 일상적인 '일과 업무'에 AI가 들어와 활용되고 있는 장면을 소개해주세요. 직접 AI를 활용해보면서 가장 놀랐던(혹은 실망했던) 순간은 언제인가요?",
+  pMain:"여러분의 일상적인 '일과 업무'에 AI가 들어와 활용되고 있는 장면을 소개해주세요.",
+  pSub:"직접 AI를 활용해보면서 가장 놀랐던(혹은 실망했던) 순간은 언제인가요?",
   ceo:"2025년 바이브 코딩을 할 때는 비개발자에게 걸림돌이 꽤 있어서 하다가 화낸 적이 많았다. 그런데 올해 연간총회 끝나고 3월에, 20여 년 전부터 도메인 비용만 내고 버려둔 개인홈페이지가 있었는데, 그 전체 내용을 클로드가 DB까지 깔끔하게 한 번에 새 사이트로 변환하는 모습을 보고 정말 깜짝 놀랐다."},
  {id:2, sec:'A', badge:'both', q:"여러분은 AI를 어떻게 배우고 계십니까? 나만의 AI 공부법을 소개해주세요.",
   ceo:"크게 3가지 방법이 있다. 첫째, AI 자체가 이미 답을 다 알고 있다 — 내가 어떻게 질문하느냐에 따라 답이 나오기 때문에, AI와의 질문답변 과정에서 가장 많이 배운다. 둘째, 유튜브 — 조코딩·코드팩토리 같은 영상은 거의 다 챙겨 본다. 셋째, IT본부 직원분들과의 교류 — 해커톤이나 회의에서 많은 것을 배운다."},
@@ -924,7 +927,9 @@ function renderSlide(keepScroll){
     var showAns = (kindOf(q) !== 'ceo') && pStageN >= 1;
     var showCeo = (kindOf(q) === 'ceo' && pStageN >= 1) || pStageN >= 2;
     var html = '<div class="p-sec">' + esc(SECTIONS[q.sec]) + '</div>';
-    html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.q) + '</div>';
+    // pMain/pSub: 발표 슬라이드 전용 — 본질문(흰색) + 부가 질문(녹색, 작은 글씨) 분리 표시
+    html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.pMain || q.q) + '</div>';
+    if(q.pSub) html += '<div class="p-qsub">' + esc(q.pSub) + '</div>';
     if(showAns) html += pAnswersHtml(q);
     if(showCeo) html += pCeoHtml(q);
     body.innerHTML = html;
