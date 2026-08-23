@@ -150,6 +150,11 @@
   .p-qnum{color:#3EE795;margin-right:.45em}
   .p-q{font-size:clamp(22px,3vw,42px);font-weight:800;line-height:1.4;margin-bottom:2.5vh;word-break:keep-all}
   .p-qsub{font-size:clamp(16px,2vw,29px);font-weight:700;color:#3EE795;line-height:1.5;margin:-1.2vh 0 2.5vh;word-break:keep-all}
+  .p-kind{margin:-1vh 0 2.2vh}
+  .p-kind span{display:inline-block;font-size:clamp(11px,1.2vw,16px);font-weight:800;padding:4px 14px;border-radius:12px;letter-spacing:.3px}
+  .p-k-both{background:rgba(62,231,149,.16);color:#3EE795;border:1px solid rgba(62,231,149,.4)}
+  .p-k-ceo{background:rgba(245,193,105,.14);color:#F5C169;border:1px solid rgba(245,193,105,.4)}
+  .p-k-only{background:rgba(79,169,232,.15);color:#4FA9E8;border:1px solid rgba(79,169,232,.4)}
   .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding-bottom:2vh}
   .p-ans{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:13px 15px}
   .p-ans .meta{font-size:clamp(12px,1.1vw,15px);font-weight:800;color:#7FD0F5;margin-bottom:4px}
@@ -1216,6 +1221,10 @@ function renderSlide(keepScroll){
     // pMain/pSub: 발표 슬라이드 전용 — 본질문(흰색) + 부가 질문(녹색, 작은 글씨) 분리 표시
     html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.pMain || q.q) + '</div>';
     if(q.pSub) html += '<div class="p-qsub">' + esc(q.pSub) + '</div>';
+    // 질문 분류 표기 (진행 참고용)
+    var kmap = {both:['모두 답변','p-k-both'], ceo:['대표님만 답변','p-k-ceo'], only:['학우만 답변','p-k-only']};
+    var kk = kmap[kindOf(q)];
+    if(kk) html += '<div class="p-kind"><span class="'+kk[1]+'">'+kk[0]+'</span></div>';
     if(showAns) html += pAnswersHtml(q);
     if(showCeo) html += pCeoHtml(q);
     body.innerHTML = html;
