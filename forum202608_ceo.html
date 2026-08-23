@@ -334,6 +334,12 @@
     <div id="admBody" class="hidden">
       <button class="btn" style="margin-bottom:12px;background:var(--navy-d);color:#fff" onclick="enterPresent()">🖥 발표 모드 시작 — 프로젝터 화면용 (F11 전체화면 추천)</button>
       <div class="card">
+        <div class="q-full" style="margin-bottom:4px">🎲 발표자 뽑기</div>
+        <div class="hint">출석 기록이 있는 학우 중에서 무작위로 뽑습니다.</div>
+        <div id="admPickResult" style="display:none;text-align:center;font-size:28px;font-weight:800;color:var(--mint);padding:16px 0"></div>
+        <button class="btn" onclick="admPick()">뽑기 / 다시 뽑기</button>
+      </div>
+      <div class="card">
         <div class="adm-row" style="border-top:none;padding:4px 2px">
           <div class="qt"><b>학우 화면 자동 이동</b>
             <div class="hint" style="margin:3px 0 0">켜짐: 발표 진행에 맞춰 학우 화면이 자동으로 따라옵니다(입력 중인 학우는 배너만 표시). 꺼짐: 자동 이동 없이, 학우가 배너를 탭해야 이동합니다.</div>
@@ -403,7 +409,7 @@
     <button class="p-btn" onclick="pMove(-1)">← 이전</button>
     <button class="p-btn" onclick="pMove(1)">다음 →</button>
     <button class="p-btn gold" id="pStageBtn" onclick="pStage()"></button>
-    <button class="p-btn" id="pPickBtn" onclick="pickRandom()" disabled>🎲 발표자 뽑기</button>
+    <button class="p-btn" id="pPickBtn" onclick="pickRandom()">🎲 발표자 뽑기</button>
     <button class="p-btn" onclick="pRefresh()">↻ 새로고침</button>
     <span class="p-keys">←→ 슬라이드 · Enter 단계 진행 · 답변 클릭=확대 · R 새로고침 · ESC 종료</span>
   </div>
@@ -924,6 +930,21 @@ function admLogin(){
   $('admGate').classList.add('hidden');
   refresh(renderAdmin);
 }
+var admLastPerson = -1;
+function admPick(){
+  refresh(function(){
+    var list = peopleList();
+    if(!list.length){ toast('아직 접속한 학우가 없습니다'); return; }
+    var i = 0;
+    if(list.length > 1){
+      do { i = Math.floor(Math.random() * list.length); } while(i === admLastPerson);
+    }
+    admLastPerson = i;
+    var el = $('admPickResult');
+    el.style.display = 'block';
+    el.innerHTML = esc(list[i].name) + ' <span style="color:var(--blue);font-size:.65em">· ' + esc(list[i].cohort) + '</span>';
+  });
+}
 function toggleAutoFollow(){
   var next = autoFollowOn ? 'off' : 'on';
   apiPost({type:'autofollow', cohort:'', name:me.name, qid:'', text:next, score:''}, function(){
@@ -1352,13 +1373,41 @@ function pSpotlight(i){
   $('pSpotAgain').style.display = pAnsList.length > 1 ? '' : 'none';
   $('pSpot').classList.add('show');
 }
-function pickRandom(){
-  if(!pAnsList.length){ toast('아직 답변이 없습니다'); return; }
+/* 출석자 명단 (출석 기록 + 답변 작성자 합집합) */
+function peopleList(){
+  var m = {};
+  Object.keys(logins).forEach(function(k){ var p=k.split('|'); m[k]={cohort:p[0], name:p[1]}; });
+  Object.keys(allAnswers).forEach(function(qid){
+    allAnswers[qid].forEach(function(a){ m[a.cohort+'|'+a.name]={cohort:a.cohort, name:a.name}; });
+  });
+  return Object.keys(m).sort().map(function(k){ return m[k]; });
+}
+var pLastPerson = -1;
+function pickPerson(){
+  var list = peopleList();
+  if(!list.length){ toast('아직 접속한 학우가 없습니다'); return; }
   var i = 0;
-  if(pAnsList.length > 1){
-    do { i = Math.floor(Math.random() * pAnsList.length); } while(i === pSpotIdx);
+  if(list.length > 1){
+    do { i = Math.floor(Math.random() * list.length); } while(i === pLastPerson);
   }
-  pSpotlight(i);
+  pLastPerson = i;
+  pSpotIdx = -1;
+  $('pSpotName').innerHTML = '🎲 발표자 뽑기';
+  $('pSpotBody').innerHTML = '<div style="text-align:center;font-size:clamp(34px,4.5vw,64px);font-weight:800;color:#3EE795">' + esc(list[i].name) + ' <span style="color:#7FD0F5;font-size:.6em">· ' + esc(list[i].cohort) + '</span></div>';
+  $('pSpotAgain').style.display = list.length > 1 ? '' : 'none';
+  $('pSpot').classList.add('show');
+}
+function pickRandom(){
+  // 질문 슬라이드에서 학우 답변이 펼쳐져 있으면 답변자 중에서, 아니면 출석자 전체에서 뽑기
+  if(pAnsList.length){
+    var i = 0;
+    if(pAnsList.length > 1){
+      do { i = Math.floor(Math.random() * pAnsList.length); } while(i === pSpotIdx);
+    }
+    pSpotlight(i);
+  } else {
+    pickPerson();
+  }
 }
 function closeSpotlight(){
   $('pSpot').classList.remove('show');
@@ -1392,7 +1441,7 @@ function renderSlide(keepScroll){
   st.disabled = false;
   if(!keepScroll) closeSpotlight();
   pAnsList = [];
-  document.getElementById('pPickBtn').disabled = true;
+  document.getElementById('pPickBtn').disabled = false;   // 답변 없으면 출석자 전체에서 뽑기
   if(s.t === 'title'){
     body.innerHTML = '<div class="p-center"><div class="p-title"><span class="accent">AX</span> 그리고 <span class="accent">리더</span></div><div class="p-sub">인공지능(AI)이 만들어낸 혁신의 시대,<br>에듀플렉스 비즈니스의 AI전환 과정을 이끌어갈 리더는 무엇을 해야 하는가?</div><div class="p-sub" style="opacity:.6">EDUSQUARE 2026 경영포럼 2nd · 고승재 대표님과의 대화</div></div>';
     st.textContent = '시작 →';
@@ -1428,7 +1477,7 @@ function renderSlide(keepScroll){
     if(showAns) html += pAnswersHtml(q);
     if(showCeo) html += pCeoHtml(q);
     body.innerHTML = html;
-    document.getElementById('pPickBtn').disabled = !(showAns && pAnsList.length > 0);
+
     // 대표님 답변이 마지막에 공개되므로, 공개 순간 해당 카드가 보이도록 스크롤
     if(showCeo && !keepScroll){ var pc = body.querySelector('.p-ceo'); if(pc) pc.scrollIntoView({block:'end'}); return; }
     if(pStageN >= max){ st.textContent = '다음 질문 →'; }
