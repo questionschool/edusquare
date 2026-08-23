@@ -409,6 +409,8 @@
     <button class="p-btn" onclick="pMove(-1)">← 이전</button>
     <button class="p-btn" onclick="pMove(1)">다음 →</button>
     <button class="p-btn gold" id="pStageBtn" onclick="pStage()"></button>
+    <button class="p-btn gold" id="pAnsBtn" onclick="pShowAns()" disabled>학우 답변 보기</button>
+    <button class="p-btn gold" id="pCeoBtn" onclick="pShowCeo()" disabled>🎤 대표님 답변</button>
     <button class="p-btn" id="pPickBtn" onclick="pickRandom()">🎲 발표자 뽑기</button>
     <button class="p-btn" onclick="pRefresh()">↻ 새로고침</button>
     <span class="p-keys">←→ 슬라이드 · Enter 단계 진행 · 답변 클릭=확대 · R 새로고침 · ESC 종료</span>
@@ -514,7 +516,7 @@ var QUESTIONS = [
   ceo:"뭐가 되든 좋으니, 클로드 코드로 IT 시스템이나 웹사이트 하나를 만들어보라."},
  {id:19, sec:'E', badge:'ceo',
   pMain:'대표님의 의사결정구조를 AI로 만드는 "경영철학 탐구 TFT" 구상 — 어떻게 실현되어 갈까요?',
-  pSub:"AI 고승재가 생기면 승계자는 무엇을 해야 합니까?",
+  pSub:"'AI 고승재'가 생기면 승계자는 무엇을 해야 합니까?",
   q:'대표님의 의사결정구조를 AI로 만드는 "경영철학 탐구 TFT" 구상 — 어떻게 실현되어 갈까요? AI 고승재가 생기면 승계자는 무엇을 해야 합니까?',
   ceo:"재료가 좋아야 한다. 그래서 지금도 몇 달째 오염된 데이터를 삭제하고, 새로운 자료들을 넣는 중이다. AI 고승재가 생기면 승계자는 잘 참고해야겠지. 맹신하면 안 된다. 세상은 다를 것이고, 승계자는 나보다 더 뛰어나야 하니까."},
  {id:20, sec:'E', badge:'ceo', q:"에듀스퀘어 3년차, 지금 시점에서 학우들에게 바라는 것 한 가지는 무엇입니까? (하반기 전략발표회 요청 사항 포함)",
@@ -1334,6 +1336,32 @@ function pStage(){
 }
 function pRefresh(){ refresh(function(){ renderSlide(true); }); }
 
+/* 상시 버튼: 학우 답변 보기 / 대표님 답변 공개 */
+function pShowAns(){
+  var s = pSlides[pIdx];
+  if(!s || s.t !== 'q' || kindOf(s.q) === 'ceo') return;
+  if(pStageN < 1){ pStageN = 1; renderSlide(); }
+  else { var g = document.querySelector('.p-grid, .dist'); if(g) g.scrollIntoView({block:'start'}); }
+}
+function pShowCeo(){
+  var s = pSlides[pIdx];
+  if(!s || s.t !== 'q') return;
+  var q = s.q;
+  if(!ceoOf(q)) return;
+  var target = kindOf(q) === 'ceo' ? 1 : 2;
+  if(pStageN < target){
+    pStageN = target;
+    if(!isRevealed(q.id)){
+      reveals[q.id] = true;
+      apiPost({type:'reveal', cohort:'', name:me.name, qid:q.id, text:'on', score:''});
+    }
+    renderSlide();
+  } else {
+    var pc = document.querySelector('.p-ceo');
+    if(pc) pc.scrollIntoView({block:'end'});
+  }
+}
+
 var pAnsList = [], pSpotIdx = -1;
 function pAnswersHtml(q){
   var list = (allAnswers[q.id]||[]).slice().sort(function(a,b){
@@ -1442,6 +1470,11 @@ function renderSlide(keepScroll){
   if(!keepScroll) closeSpotlight();
   pAnsList = [];
   document.getElementById('pPickBtn').disabled = false;   // 답변 없으면 출석자 전체에서 뽑기
+  var _ansB = document.getElementById('pAnsBtn'), _ceoB = document.getElementById('pCeoBtn');
+  var _sq = pSlides[pIdx];
+  st.style.display = (_sq && _sq.t === 'q') ? 'none' : '';   // 질문 슬라이드에선 상시 버튼으로 대체
+  _ansB.disabled = !(_sq && _sq.t === 'q' && kindOf(_sq.q) !== 'ceo');
+  _ceoB.disabled = !(_sq && _sq.t === 'q' && ceoOf(_sq.q));
   if(s.t === 'title'){
     body.innerHTML = '<div class="p-center"><div class="p-title"><span class="accent">AX</span> 그리고 <span class="accent">리더</span></div><div class="p-sub">인공지능(AI)이 만들어낸 혁신의 시대,<br>에듀플렉스 비즈니스의 AI전환 과정을 이끌어갈 리더는 무엇을 해야 하는가?</div><div class="p-sub" style="opacity:.6">EDUSQUARE 2026 경영포럼 2nd · 고승재 대표님과의 대화</div></div>';
     st.textContent = '시작 →';
