@@ -240,6 +240,21 @@
   .sch-c{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:8px;text-align:center;padding:2vh .4vw;font-size:clamp(15px,2vw,29px);font-weight:800;display:flex;align-items:center;justify-content:center}
   .sch-c.on{color:#7FD0F5;font-weight:700}
   .sch-c.off{color:#3EE795}
+  /* 출석·진도 현황 */
+  body.wide .wrap{max-width:1150px}
+  .st-tiles{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .st-tile{flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center}
+  .st-tile b{display:block;font-size:24px;color:var(--mint)}
+  .st-tile span{font-size:12px;color:var(--sub)}
+  .st-scroll{overflow-x:auto}
+  table.st{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+  table.st th,table.st td{border:1px solid var(--line);padding:5px 7px;text-align:center}
+  table.st th{background:rgba(62,231,149,.12);color:var(--mint);position:sticky;top:0}
+  table.st td.nm{text-align:left;font-weight:700}
+  table.st td.qd{background:rgba(62,231,149,.22);color:var(--mint);font-weight:800}
+  table.st td.qn{color:#4A607A}
+  .st-bar{width:90px;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle}
+  .st-bar>div{height:100%;background:linear-gradient(90deg,var(--mint-deep),var(--mint))}
 </style>
 </head>
 <body>
@@ -352,6 +367,18 @@
     </div>
     <div id="ceoBody" class="hidden"></div>
   </div>
+
+  <!-- 출석·진도 현황 -->
+  <div id="viewStatus" class="hidden">
+    <div class="card" id="stGate">
+      <div class="q-full">출석 · 답변 진도 현황</div>
+      <div class="hint">진행자 비밀번호를 입력하세요. 10초마다 자동 새로고침됩니다.</div>
+      <input type="text" id="stPw" placeholder="비밀번호">
+      <div style="height:12px"></div>
+      <button class="btn" onclick="stLogin()">입장</button>
+    </div>
+    <div id="stBody" class="hidden"></div>
+  </div>
 </div>
 
 <!-- 발표 모드 (프로젝터) -->
@@ -409,7 +436,7 @@
 <script>
 /* ================= 설정 ================= */
 var PAGE = 'admin';   // 이 파일의 역할: live=포럼 참여 / board=모두의 답 / admin=진행자
-var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html', ceo:'forum202608_ceo.html', show:'forum202608_show.html' };
+var PAGE_FILES = { live:'forum202608.html', board:'forum202608_board.html', admin:'forum202608_admin.html', ceo:'forum202608_ceo.html', show:'forum202608_show.html', status:'forum202608_status.html' };
 var CEO_PW = 'ceo2026';        // ← 대표님 전용 페이지 비밀번호
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuuhoVY27FU-i-8yRI8UB2OuFzPoteRJ5kU0B_htmYl4bQbv76yJfmpc7Pry-_LdQTOQ/exec';
 var ADMIN_PW   = 'edu2026';     // ← 진행자(학장) 비밀번호
@@ -505,6 +532,7 @@ var myAnswers = {};      // qid -> {text, score}
 var allAnswers = {};     // qid -> [{cohort,name,text,score,ts}]
 var reveals = {};        // qid -> true/false, 'ALL' -> true/false
 var ceoEdits = {};       // qid -> {text, score} — 대표님이 직접 수정한 답변 (내장 답변보다 우선)
+var logins = {};         // 'cohort|name' -> 최초 접속 ts (출석)
 var demoRows = [];       // 데모 모드 저장소
 var curQ = null, curScore = null, curChoice = null, isAdmin = false;
 var currentQid = null;   // 진행자가 브로드캐스트한 현재 문항
@@ -534,7 +562,7 @@ function apiPost(row, cb){
    .catch(function(){ toast('저장에 실패했습니다. 다시 시도해 주세요'); });
 }
 function rebuild(rows){
-  allAnswers = {}; reveals = {}; autoFollowOn = true;
+  allAnswers = {}; reveals = {}; autoFollowOn = true; logins = {};
   rows.sort(function(a,b){return (a.ts||0)-(b.ts||0);});
   var latest = {};
   rows.forEach(function(r){
@@ -543,6 +571,7 @@ function rebuild(rows){
     if(r.type==='ceoedit'){ ceoEdits[r.qid] = {text:r.text, score:r.score}; return; }
     if(r.type==='kind'){ kindOverrides[r.qid] = r.text; return; }
     if(r.type==='autofollow'){ autoFollowOn = (r.text==='on'); return; }
+    if(r.type==='login'){ var lk=r.cohort+'|'+r.name; if(!logins[lk] || r.ts<logins[lk]) logins[lk]=r.ts; return; }
     if(r.type!=='answer') return;
     latest[r.cohort+'|'+r.name+'|'+r.qid] = r;
   });
@@ -574,6 +603,7 @@ function enterApp(){
   $('viewLogin').classList.add('hidden');
   $('whoChip').textContent = me.cohort+' · '+me.name;
   $('whoChip').classList.remove('hidden');
+  apiPost({type:'login', cohort:me.cohort, name:me.name, qid:'', text:'', score:''});   // 출석 기록
   if(PAGE==='board'){
     refresh(function(){ renderBrowse(); $('viewBrowse').classList.remove('hidden'); });
   } else {
@@ -1017,6 +1047,66 @@ function saveCeo(id){
   });
 }
 
+/* ================= 출석·진도 현황 ================= */
+var stOn = false, stTimer = null;
+function stLogin(){
+  if($('stPw').value !== ADMIN_PW){ toast('비밀번호가 올바르지 않습니다'); return; }
+  stOn = true;
+  $('stGate').classList.add('hidden');
+  refresh(renderStatus);
+  if(!stTimer) stTimer = setInterval(function(){ refresh(renderStatus); }, 10000);
+}
+function renderStatus(){
+  $('stBody').classList.remove('hidden');
+  var aq = answerableQs();
+  // 사람 목록: 출석 기록 + 답변 기록의 합집합
+  var people = {};
+  Object.keys(logins).forEach(function(k){
+    var p = k.split('|');
+    people[k] = { cohort:p[0], name:p[1], ts:logins[k], answered:{} };
+  });
+  Object.keys(allAnswers).forEach(function(qid){
+    allAnswers[qid].forEach(function(a){
+      var k = a.cohort+'|'+a.name;
+      if(!people[k]) people[k] = { cohort:a.cohort, name:a.name, ts:null, answered:{} };
+      people[k].answered[qid] = true;
+    });
+  });
+  var rows = Object.keys(people).map(function(k){ return people[k]; });
+  rows.sort(function(a,b){ return a.cohort===b.cohort ? a.name.localeCompare(b.name) : a.cohort.localeCompare(b.cohort); });
+  var att = rows.length;
+  var started = rows.filter(function(r){ return Object.keys(r.answered).length>0; }).length;
+  var doneAll = rows.filter(function(r){ return aq.every(function(q){ return r.answered[q.id]; }); }).length;
+  var avg = rows.length ? Math.round(rows.reduce(function(t,r){ return t+Object.keys(r.answered).filter(function(id){ return aq.some(function(q){return q.id==id;}); }).length; },0) / rows.length * 10) / 10 : 0;
+  var html = '<div class="st-tiles">'
+    + '<div class="st-tile"><b>'+att+'</b><span>출석 인원</span></div>'
+    + '<div class="st-tile"><b>'+started+'</b><span>답변 시작</span></div>'
+    + '<div class="st-tile"><b>'+doneAll+'</b><span>전체 완료</span></div>'
+    + '<div class="st-tile"><b>'+avg+'</b><span>평균 답변 수 / '+aq.length+'</span></div>'
+    + (currentQid ? '<div class="st-tile"><b>Q'+currentQid+'</b><span>현재 진행 문항</span></div>' : '')
+    + '</div>';
+  html += '<div class="card"><div class="board-title">개인별 현황</div><div class="st-scroll"><table class="st"><tr><th>기수</th><th>이름</th><th>출석</th><th>진도</th>';
+  aq.forEach(function(q){ html += '<th>'+q.id+'</th>'; });
+  html += '</tr>';
+  rows.forEach(function(r){
+    var cnt = aq.filter(function(q){ return r.answered[q.id]; }).length;
+    var t = r.ts ? new Date(r.ts).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) : '—';
+    html += '<tr><td>'+esc(r.cohort)+'</td><td class="nm">'+esc(r.name)+'</td><td>'+t+'</td>'
+      + '<td>'+cnt+'/'+aq.length+' <span class="st-bar"><div style="width:'+Math.round(cnt/Math.max(1,aq.length)*100)+'%"></div></span></td>';
+    aq.forEach(function(q){ html += r.answered[q.id] ? '<td class="qd">✓</td>' : '<td class="qn">·</td>'; });
+    html += '</tr>';
+  });
+  if(!rows.length) html += '<tr><td colspan="'+(4+aq.length)+'">아직 접속한 학우가 없습니다</td></tr>';
+  html += '</table></div></div>';
+  // 질문별 응답 수
+  html += '<div class="card"><div class="board-title">질문별 응답 수</div><div class="st-scroll"><table class="st"><tr>';
+  aq.forEach(function(q){ html += '<th>Q'+q.id+'</th>'; });
+  html += '</tr><tr>';
+  aq.forEach(function(q){ html += '<td>'+((allAnswers[q.id]||[]).length)+'</td>'; });
+  html += '</tr></table></div></div>';
+  $('stBody').innerHTML = html;
+}
+
 /* ================= 발표 모드 ================= */
 var pSlides = [], pIdx = 0, pStageN = 0, pTimer = null, pLastBroadcast = null;
 
@@ -1362,6 +1452,14 @@ function renderSlide(keepScroll){
     isAdmin = true;
     $('viewLogin').classList.add('hidden');
     refresh(function(){ enterPresent(); });
+    return;
+  }
+  if(PAGE === 'status'){
+    // 출석·진도 현황 페이지
+    document.body.classList.add('wide');
+    me = {cohort:'운영팀', name:'현황판'};
+    $('viewLogin').classList.add('hidden');
+    $('viewStatus').classList.remove('hidden');
     return;
   }
   if(PAGE === 'ceo'){
