@@ -210,6 +210,36 @@
   /* 글라이처 공식 */
   .gl-row{display:flex;align-items:center;gap:1.2vw;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:1.2vh 1.5vw;font-size:clamp(13px,1.7vw,23px);line-height:1.5}
   .gl-row>b{color:#3EE795;font-size:clamp(20px,2.6vw,36px);width:1.4em;text-align:center;flex-shrink:0}
+  /* 공지 슬라이드 */
+  .an-wrap{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:1vh 1vw}
+  .an-h{font-size:clamp(20px,2.6vw,38px);font-weight:800;color:#3EE795}
+  .an-h small{color:#8FE7C0;font-weight:600;font-size:.62em}
+  .an-t{font-size:clamp(22px,3vw,44px);font-weight:800;color:#fff;margin:1.2vh 0 0;border-bottom:3px solid #fff;padding-bottom:1.2vh}
+  .an-t small{font-weight:700;font-size:.65em;color:#D7E4EE}
+  .an-cols{display:flex;gap:1.5vw;margin-top:2.5vh;align-items:stretch}
+  .an-main{flex:1.05;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.4);border-radius:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:4vh 1.5vw;font-size:clamp(20px,2.6vw,40px);font-weight:800;line-height:1.55}
+  .an-main small{font-size:.6em;font-weight:700;color:#D7E4EE;margin-top:1.5vh}
+  .an-side{flex:1;display:flex;flex-direction:column}
+  .an-side-h{background:#BFD9D4;color:#12262E;font-weight:800;text-align:center;border-radius:6px 6px 0 0;padding:1.2vh 0;font-size:clamp(15px,1.8vw,24px)}
+  .an-side-b{background:rgba(232,237,242,.94);color:#222;flex:1;border-radius:0 0 6px 6px;padding:2.5vh 1.8vw;font-size:clamp(13px,1.6vw,22px);line-height:1.85}
+  .an-side-b b{color:#0E5C42}
+  .an-steps{display:flex;gap:1.2vw;align-items:stretch;margin-top:2.5vh}
+  .an-step{flex:1;display:flex;flex-direction:column;gap:1vh;text-align:center}
+  .an-step-t{background:rgba(255,255,255,.85);color:#333;font-weight:800;border-radius:6px;padding:3.5vh .5vw;font-size:clamp(16px,2vw,28px);display:flex;align-items:center;justify-content:center}
+  .an-step-t.hl{background:#2FA37C;color:#fff;border:2px solid #fff}
+  .an-step-b{background:rgba(191,217,212,.9);color:#12262E;border-radius:6px;padding:1.6vh .6vw;font-size:clamp(12px,1.4vw,19px);line-height:1.6;flex:1}
+  .an-rows{display:flex;flex-direction:column;gap:1.4vh;margin-top:2.5vh}
+  .an-row{display:flex;align-items:stretch;gap:1vw}
+  .an-row>b{background:#BFD9D4;color:#12262E;border-radius:6px;display:flex;align-items:center;justify-content:center;width:3.2em;font-size:clamp(16px,2vw,28px);flex-shrink:0}
+  .an-row>span{flex:1;background:rgba(232,237,242,.92);color:#333;border-radius:6px;padding:1.8vh 1.5vw;font-size:clamp(14px,1.8vw,25px);font-weight:700;text-align:center}
+  .an-badge{align-self:center;margin-top:2vh;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.6);border-radius:6px;padding:1.4vh 3vw;font-size:clamp(16px,2.1vw,30px);font-weight:800}
+  .an-grid4{display:grid;grid-template-columns:1fr 1fr;gap:1.4vh 1.2vw;margin-top:2.5vh}
+  .an-grid4>div{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.5);border-radius:6px;text-align:center;padding:4.5vh .5vw;font-size:clamp(20px,2.6vw,38px);font-weight:800}
+  .sch-grid{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:6px;width:min(88vw,1150px);margin:1.5vh auto 0}
+  .sch-h{background:rgba(79,169,232,.18);color:#7FD0F5;font-weight:800;text-align:center;border-radius:8px;padding:1.2vh 0;font-size:clamp(14px,1.7vw,23px)}
+  .sch-c{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:8px;text-align:center;padding:2vh .4vw;font-size:clamp(15px,2vw,29px);font-weight:800;display:flex;align-items:center;justify-content:center}
+  .sch-c.on{color:#7FD0F5;font-weight:700}
+  .sch-c.off{color:#3EE795}
 </style>
 </head>
 <body>
@@ -1042,6 +1072,72 @@ var CUSTOM_SLIDES = [
     + '</div>'
     + '<div style="font-size:clamp(13px,1.6vw,22px);color:#E9F3F7;max-width:min(84vw,1000px);line-height:1.65;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:1.8vh 2vw">세 요소는 덧셈이 아니라 <b style="color:#3EE795">곱셈</b>입니다 — 하나라도 0이면 좌변 전체가 0이 되어 저항을 넘지 못합니다. 앞의 매트릭스와 겹쳐 보면, 악어를 보게 하는 것이 D, 황금단지를 보여주는 것이 V, 목발을 치워주는 것이 F — 그리고 <b style="color:#F87171">R을 낮추는 일은 인어(세이렌)의 유혹, 즉 \'지금 이대로가 좋다\'는 달콤함에 빠지지 않게 돕는 것</b>입니다.</div>'
     + '</div>' },
+  /* ===== 마무리 공지 슬라이드 ===== */
+  { at:{beforeEnd:true}, html:
+    '<div class="cs-center"><div style="border:2px solid #fff;border-radius:50%;width:min(52vh,430px);height:min(52vh,430px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1.8vh">'
+    + '<div style="font-size:clamp(30px,4vw,56px);font-weight:800;color:#3EE795">00</div>'
+    + '<div style="font-size:clamp(22px,2.8vw,40px);color:#3EE795;font-weight:700">공지 및 안내</div>'
+    + '<div style="font-size:clamp(14px,1.8vw,24px);color:#fff">하반기 일정 안내</div>'
+    + '</div></div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div style="text-align:center;font-size:clamp(24px,3.4vw,50px);font-weight:800;color:#3EE795">하반기 일정 안내</div>'
+    + '<div class="sch-grid">'
+    + '<div class="sch-h">📅 일정</div><div class="sch-h">📋 프로그램</div><div class="sch-h">👥 참여 형태</div>'
+    + '<div class="sch-c">9/20 (일)</div><div class="sch-c">철학 포럼</div><div class="sch-c on">온라인</div>'
+    + '<div class="sch-c">10/25 (일)</div><div class="sch-c">전략발표회 2</div><div class="sch-c on">온라인</div>'
+    + '<div class="sch-c">11/22 (일)</div><div class="sch-c">인물탐구발표회</div><div class="sch-c on">온라인</div>'
+    + '<div class="sch-c">12/19 (토)</div><div class="sch-c">2026 마무리</div><div class="sch-c off">오프라인<br>(오프라인 진행!)</div>'
+    + '</div></div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div class="an-h"><span class="p-qnum">01</span>철학 포럼 <small>(Philosophy)</small></div>'
+    + '<div class="an-t">포럼 주제 및 교수 안내 <small>(9/20)</small></div>'
+    + '<div class="an-cols">'
+    + '<div class="an-main">대기자 280명을<br>만든 비결<small>— FC 사업본부 홍지헌 본부장</small></div>'
+    + '<div class="an-side"><div class="an-side-h">사전 설문 안내</div><div class="an-side-b">포럼에서 다룰 주제를 미리 확인하고, 교수님께 궁금한 점이나 질문하고 싶은 내용을 남겨주세요.<br>여러분의 질문을 바탕으로 당일 Q&amp;A가 진행될 예정입니다.<br><br>📌 <b>설문 오픈 : 8/24 (월)</b></div></div>'
+    + '</div></div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div class="an-h"><span class="p-qnum">02</span>전략발표회 <small>(Problem-solving)</small></div>'
+    + '<div class="an-t">발표 2 주제 및 진행 방식 <small>(10/25)</small></div>'
+    + '<div class="an-cols">'
+    + '<div class="an-main">AI 시대, 10년 후<br>에듀플렉스의 모습</div>'
+    + '<div class="an-side"><div class="an-side-h">진행 방식</div><div class="an-side-b">● <b>제출</b> — 형식 : PPT<br>&nbsp;&nbsp;&nbsp;기한 : ~10/24<br>&nbsp;&nbsp;&nbsp;방법 : 교육개발팀 메일 (hrd@eduplex.net)<br><br>● <b>발표</b> — 5분 + 상호심사</div></div>'
+    + '</div></div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div class="an-h"><span class="p-qnum">03</span>인물 탐구 발표회 <small>(Exploring successful CEOs)</small></div>'
+    + '<div class="an-t">올해의 CEO</div>'
+    + '<div class="an-cols"><div class="an-main" style="background:rgba(62,231,149,.13);border-color:rgba(62,231,149,.5)">이병철 회장<small>삼성 창업주 · 올해의 탐구 인물</small></div></div>'
+    + '</div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div class="an-h"><span class="p-qnum">03</span>인물 탐구 발표회 <small>(Exploring successful CEOs)</small></div>'
+    + '<div class="an-t">진행일정</div>'
+    + '<div class="an-steps">'
+    + '<div class="an-step"><div class="an-step-t">발표 준비</div><div class="an-step-b">학습 및 5분 PT 개별 준비<br>▶ 발표 자료 제출 (~11/21)</div></div>'
+    + '<div class="an-step"><div class="an-step-t hl">전체 발표<br>(A반/B반/C반)</div><div class="an-step-b"><b>11/22 (일)</b><br>ZOOM 접속</div></div>'
+    + '<div class="an-step"><div class="an-step-t">발표 심사</div><div class="an-step-b">5분 PT 발표 &amp; 질의응답 후,<br>반별 상호평가</div></div>'
+    + '</div></div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div class="an-h"><span class="p-qnum">04</span>동아리 활동</div>'
+    + '<div class="an-t">동아리 현황 _ 3기</div>'
+    + '<div class="an-grid4"><div>오.운.완</div><div>에듀로</div><div>UP (업)</div><div>리더십캠프 준비위원회</div></div>'
+    + '</div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div class="an-h"><span class="p-qnum">04</span>동아리 활동</div>'
+    + '<div class="an-t">점수 산출</div>'
+    + '<div class="an-rows">'
+    + '<div class="an-row"><b>1</b><span>월 1회 이상 온/오프라인 운영 (출석부 제출 필수)</span></div>'
+    + '<div class="an-row"><b>2</b><span>동아리 활동 결과물 (간단한 영상 제출)</span></div>'
+    + '<div class="an-row"><b>3</b><span>동아리 장 역할 수행 또는 복수 동아리 참여</span></div>'
+    + '</div><div class="an-badge">▼ 가점부여 (최대 10점)</div>'
+    + '</div>' },
+  { at:{beforeEnd:true}, html:
+    '<div class="an-wrap"><div class="an-h"><span class="p-qnum">04</span>동아리 활동</div>'
+    + '<div class="an-t">진행일정 및 방식</div>'
+    + '<div style="margin-top:2.5vh;font-size:clamp(14px,1.8vw,26px);line-height:2;font-weight:700">'
+    + '1. 각 동아리 별, 결과보고 내용을 영상으로 촬영 및 제출 <span style="color:#8FA6BC">(5분 내외)</span><br>'
+    + '<span style="color:#C8D8EA;font-weight:600;font-size:.85em">&nbsp;&nbsp;&nbsp;- 활동 내용, 결과물, 모임 사진 등 자유롭게 내용 구성<br>&nbsp;&nbsp;&nbsp;- 교육개발팀 메일 (hrd@eduplex.net) 로 제출<br>&nbsp;&nbsp;&nbsp;- 영상 제출 일정 : <b style="color:#3EE795">2026년 11월 23일 (월) 오전 11시</b></span><br><br>'
+    + '2. 유니버시티에 업로드 된 동아리 결과보고 영상 개별 시청 후, 설문 진행<br>'
+    + '<span style="color:#C8D8EA;font-weight:600;font-size:.85em">&nbsp;&nbsp;&nbsp;- 영상 시청 및 설문 작성 일정 : <b style="color:#3EE795">2026년 11월 30일 (월) 오후 6시</b></span>'
+    + '</div></div>' },
 ];
 
 function buildSlides(){
@@ -1058,6 +1154,7 @@ function buildSlides(){
     if(cs.at.afterSec){ idx = pSlides.findIndex(function(s){ return s.t==='sec' && s.sec===cs.at.afterSec; }); }
     else if(cs.at.afterQ){ idx = pSlides.findIndex(function(s){ return s.t==='q' && s.q.id===cs.at.afterQ; }); }
     else if(cs.at.beforeQ){ idx = pSlides.findIndex(function(s){ return s.t==='q' && s.q.id===cs.at.beforeQ; }) - 1; }
+    else if(cs.at.beforeEnd){ idx = pSlides.length - 2; }
     if(idx >= 0) pSlides.splice(idx+1, 0, {t:'custom', html:cs.html});
   });
 }
