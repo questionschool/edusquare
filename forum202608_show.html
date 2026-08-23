@@ -1331,7 +1331,7 @@ function renderSlide(keepScroll){
     html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.pMain || q.q) + '</div>';
     if(q.pSub) html += '<div class="p-qsub">' + esc(q.pSub) + '</div>';
     // 질문 분류 표기 (진행 참고용)
-    var kmap = {both:['모두 답변','p-k-both'], ceo:['대표님만 답변','p-k-ceo'], only:['학우만 답변','p-k-only']};
+    var kmap = {ceo:['대표님만 답변','p-k-ceo'], only:['학우만 답변','p-k-only']};   // 표기 없음 = 모두 답변
     var kk = kmap[kindOf(q)];
     if(kk) html += '<div class="p-kind"><span class="'+kk[1]+'">'+kk[0]+'</span></div>';
     if(showAns) html += pAnswersHtml(q);
