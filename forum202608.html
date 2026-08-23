@@ -408,9 +408,9 @@
   <div class="p-bar">
     <button class="p-btn" onclick="pMove(-1)">← 이전</button>
     <button class="p-btn" onclick="pMove(1)">다음 →</button>
-    <button class="p-btn gold" id="pStageBtn" onclick="pStage()"></button>
-    <button class="p-btn gold" id="pAnsBtn" onclick="pShowAns()" disabled>학우 답변 보기</button>
-    <button class="p-btn gold" id="pCeoBtn" onclick="pShowCeo()" disabled>🎤 대표님 답변</button>
+    <button class="p-btn" id="pStageBtn" onclick="pStage()" style="display:none"></button>
+    <button class="p-btn" id="pAnsBtn" onclick="pShowAns()" disabled>학우 답변</button>
+    <button class="p-btn" id="pCeoBtn" onclick="pShowCeo()" disabled>🎤 대표님 답변</button>
     <button class="p-btn" id="pPickBtn" onclick="pickRandom()">🎲 발표자 뽑기</button>
     <button class="p-btn" onclick="pRefresh()">↻ 새로고침</button>
     <span class="p-keys">←→ 슬라이드 · Enter 단계 진행 · 답변 클릭=확대 · R 새로고침 · ESC 종료</span>
@@ -1132,6 +1132,7 @@ function renderStatus(){
 
 /* ================= 발표 모드 ================= */
 var pSlides = [], pIdx = 0, pStageN = 0, pTimer = null, pLastBroadcast = null;
+var pShowA = false, pShowC = false;   // 학우 답변 / 대표님 답변 표시 토글
 
 /* ===== 커스텀 슬라이드 =====
    발표 흐름에 자유 슬라이드를 끼워 넣는다.
@@ -1302,18 +1303,18 @@ function pKeys(e){
 }
 function pMove(d){
   pIdx = Math.max(0, Math.min(pSlides.length - 1, pIdx + d));
-  pStageN = 0;
+  pStageN = 0; pShowA = false; pShowC = false;
   renderSlide();
 }
 /* AX 버튼: 첫 페이지 ↔ 최근 재생 페이지 토글 */
 var axReturn = null;
 function axHome(){
   if(pIdx !== 0){
-    axReturn = { idx: pIdx, stage: pStageN };
-    pIdx = 0; pStageN = 0;
+    axReturn = { idx: pIdx, stage: pStageN, a: pShowA, c: pShowC };
+    pIdx = 0; pStageN = 0; pShowA = false; pShowC = false;
     renderSlide();
   } else if(axReturn){
-    pIdx = axReturn.idx; pStageN = axReturn.stage;
+    pIdx = axReturn.idx; pStageN = axReturn.stage; pShowA = !!axReturn.a; pShowC = !!axReturn.c;
     renderSlide();
   }
 }
@@ -1324,42 +1325,32 @@ function pMaxStage(q){
 function pStage(){
   var s = pSlides[pIdx];
   if(s.t !== 'q'){ pMove(1); return; }
-  var max = pMaxStage(s.q);
-  if(pStageN >= max){ pMove(1); return; }
-  pStageN++;
-  var ceoNow = (kindOf(s.q) === 'ceo' && pStageN >= 1) || pStageN >= 2;
-  if(ceoNow && ceoOf(s.q) && !isRevealed(s.q.id)){
-    reveals[s.q.id] = true;  // 즉시 반영 + 시트 기록 → 학우 폰에도 공개
-    apiPost({type:'reveal', cohort:'', name:me.name, qid:s.q.id, text:'on', score:''});
-  }
-  renderSlide();
+  var q = s.q;
+  if(kindOf(q) !== 'ceo' && !pShowA){ pShowAns(); return; }
+  if(ceoOf(q) && !pShowC){ pShowCeo(); return; }
+  pMove(1);
 }
 function pRefresh(){ refresh(function(){ renderSlide(true); }); }
 
-/* 상시 버튼: 학우 답변 보기 / 대표님 답변 공개 */
+/* 상시 토글 버튼: 학우 답변 / 대표님 답변 — 누르면 켜지고, 다시 누르면 꺼짐 */
 function pShowAns(){
   var s = pSlides[pIdx];
   if(!s || s.t !== 'q' || kindOf(s.q) === 'ceo') return;
-  if(pStageN < 1){ pStageN = 1; renderSlide(); }
-  else { var g = document.querySelector('.p-grid, .dist'); if(g) g.scrollIntoView({block:'start'}); }
+  pShowA = !pShowA;
+  renderSlide(true);
 }
 function pShowCeo(){
   var s = pSlides[pIdx];
   if(!s || s.t !== 'q') return;
   var q = s.q;
   if(!ceoOf(q)) return;
-  var target = kindOf(q) === 'ceo' ? 1 : 2;
-  if(pStageN < target){
-    pStageN = target;
-    if(!isRevealed(q.id)){
-      reveals[q.id] = true;
-      apiPost({type:'reveal', cohort:'', name:me.name, qid:q.id, text:'on', score:''});
-    }
-    renderSlide();
-  } else {
-    var pc = document.querySelector('.p-ceo');
-    if(pc) pc.scrollIntoView({block:'end'});
+  pShowC = !pShowC;
+  if(pShowC && !isRevealed(q.id)){
+    reveals[q.id] = true;   // 발표 화면 공개 기록 (웹은 전체 일괄 공개 시에만 표시)
+    apiPost({type:'reveal', cohort:'', name:me.name, qid:q.id, text:'on', score:''});
   }
+  renderSlide(true);
+  if(pShowC){ var pc = document.querySelector('.p-ceo'); if(pc) pc.scrollIntoView({block:'end'}); }
 }
 
 var pAnsList = [], pSpotIdx = -1;
@@ -1472,9 +1463,10 @@ function renderSlide(keepScroll){
   document.getElementById('pPickBtn').disabled = false;   // 답변 없으면 출석자 전체에서 뽑기
   var _ansB = document.getElementById('pAnsBtn'), _ceoB = document.getElementById('pCeoBtn');
   var _sq = pSlides[pIdx];
-  st.style.display = (_sq && _sq.t === 'q') ? 'none' : '';   // 질문 슬라이드에선 상시 버튼으로 대체
   _ansB.disabled = !(_sq && _sq.t === 'q' && kindOf(_sq.q) !== 'ceo');
   _ceoB.disabled = !(_sq && _sq.t === 'q' && ceoOf(_sq.q));
+  _ansB.classList.toggle('gold', !_ansB.disabled && pShowA);
+  _ceoB.classList.toggle('gold', !_ceoB.disabled && pShowC);
   if(s.t === 'title'){
     body.innerHTML = '<div class="p-center"><div class="p-title"><span class="accent">AX</span> 그리고 <span class="accent">리더</span></div><div class="p-sub">인공지능(AI)이 만들어낸 혁신의 시대,<br>에듀플렉스 비즈니스의 AI전환 과정을 이끌어갈 리더는 무엇을 해야 하는가?</div><div class="p-sub" style="opacity:.6">EDUSQUARE 2026 경영포럼 2nd · 고승재 대표님과의 대화</div></div>';
     st.textContent = '시작 →';
@@ -1497,8 +1489,8 @@ function renderSlide(keepScroll){
       apiPost({type:'current', cohort:'', name:me.name, qid:q.id, text:'', score:''});
     }
     var max = pMaxStage(q);
-    var showAns = (kindOf(q) !== 'ceo') && pStageN >= 1;
-    var showCeo = (kindOf(q) === 'ceo' && pStageN >= 1) || pStageN >= 2;
+    var showAns = (kindOf(q) !== 'ceo') && pShowA;
+    var showCeo = pShowC && !!ceoOf(q);
     var html = '<div class="p-sec">' + esc(SECTIONS[q.sec]) + '</div>';
     // pMain/pSub: 발표 슬라이드 전용 — 본질문(흰색) + 부가 질문(녹색, 작은 글씨) 분리 표시
     html += '<div class="p-q"><span class="p-qnum">' + (q.id < 10 ? '0' : '') + q.id + '</span>' + esc(q.pMain || q.q) + '</div>';
