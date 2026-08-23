@@ -144,6 +144,14 @@
   #present .dist-row .fill{background:#3EE795}
   .dist-avg{font-size:12.5px;color:var(--sub);margin-top:4px}
   #present .dist-avg{color:#C8D8EA;font-size:clamp(13px,1.4vw,17px)}
+  /* 커스텀 슬라이드 */
+  .cs-center{min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2vh}
+  .cs-q{font-size:clamp(18px,2.3vw,34px);font-weight:800;color:#3EE795;word-break:keep-all}
+  .cs-x{font-size:clamp(70px,10vw,150px);font-weight:800;color:#3EE795;line-height:.9}
+  .cs-xsub{font-size:clamp(12px,1.4vw,20px);color:#fff;font-weight:600;margin-top:1vh}
+  .cs-arrows{width:min(60vw,720px);height:auto;opacity:.8}
+  .cs-boxes{display:flex;gap:1.6vw;justify-content:center;width:min(84vw,1100px)}
+  .cs-boxes>div{flex:1;background:rgba(255,255,255,.15);border-radius:6px;padding:4.5vh .5vw;font-size:clamp(36px,5.5vw,80px);font-weight:800;color:#3EE795}
 </style>
 </head>
 <body>
@@ -778,6 +786,26 @@ function saveCeo(id){
 /* ================= 발표 모드 ================= */
 var pSlides = [], pIdx = 0, pStageN = 0, pTimer = null, pLastBroadcast = null;
 
+/* ===== 커스텀 슬라이드 =====
+   발표 흐름에 자유 슬라이드를 끼워 넣는다.
+   at: {afterSec:'A'} = 해당 섹션 표지 뒤 / {beforeQ:5} = 해당 문항 슬라이드 앞 / {afterQ:3} = 해당 문항 뒤 */
+var CUSTOM_SLIDES = [
+  { at:{afterSec:'A'}, html:
+    '<div class="cs-center">'
+    + '<div class="cs-q">2026년 상반기, 여러분은 AI를 활용해 무엇을 바꿔보려고 했나요?</div>'
+    + '<div class="cs-x">X<div class="cs-xsub">AI Transformation</div></div>'
+    + '<svg class="cs-arrows" viewBox="0 0 600 80" xmlns="http://www.w3.org/2000/svg">'
+    +   '<defs><marker id="csah" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" refX="15" refY="11" orient="auto"><path d="M0,2 L20,11 L0,20 z" fill="#AAB7C4"/></marker></defs>'
+    +   '<g stroke="#AAB7C4" stroke-width="7">'
+    +     '<line x1="70" y1="76" x2="268" y2="16" marker-end="url(#csah)"/>'
+    +     '<line x1="300" y1="76" x2="300" y2="18" marker-end="url(#csah)"/>'
+    +     '<line x1="530" y1="76" x2="332" y2="16" marker-end="url(#csah)"/>'
+    +   '</g></svg>'
+    + '<div class="cs-boxes"><div>AI</div><div>Do</div><div>Learn</div></div>'
+    + '<div class="cs-q" style="margin-top:1vh">그리고 그 경험을 통해 무엇을 배웠나요?</div>'
+    + '</div>' },
+];
+
 function buildSlides(){
   pSlides = [{t:'title'}];
   var last = '';
@@ -786,6 +814,14 @@ function buildSlides(){
     pSlides.push({t:'q', q:q});
   });
   pSlides.push({t:'end'});
+  // 커스텀 슬라이드 삽입
+  CUSTOM_SLIDES.forEach(function(cs){
+    var idx = -1;
+    if(cs.at.afterSec){ idx = pSlides.findIndex(function(s){ return s.t==='sec' && s.sec===cs.at.afterSec; }); }
+    else if(cs.at.afterQ){ idx = pSlides.findIndex(function(s){ return s.t==='q' && s.q.id===cs.at.afterQ; }); }
+    else if(cs.at.beforeQ){ idx = pSlides.findIndex(function(s){ return s.t==='q' && s.q.id===cs.at.beforeQ; }) - 1; }
+    if(idx >= 0) pSlides.splice(idx+1, 0, {t:'custom', html:cs.html});
+  });
 }
 function enterPresent(){
   if(!isAdmin) return;
@@ -868,6 +904,9 @@ function renderSlide(keepScroll){
     st.textContent = '시작 →';
   } else if(s.t === 'sec'){
     body.innerHTML = '<div class="p-center"><div class="p-title" style="color:#3EE795">' + esc(SECTIONS[s.sec]) + '</div></div>';
+    st.textContent = '다음 →';
+  } else if(s.t === 'custom'){
+    body.innerHTML = s.html;
     st.textContent = '다음 →';
   } else if(s.t === 'end'){
     body.innerHTML = '<div class="p-center"><div class="p-title">오늘의 배움을, 각자의 현장에서 실천으로.</div><div class="p-sub">다음 만남 — 9월 20일 철학포럼 · 홍지헌 본부장님 특강</div></div>';
