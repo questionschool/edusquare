@@ -145,6 +145,16 @@
   #present .dist-row .fill{background:#3EE795}
   .dist-avg{font-size:12.5px;color:var(--sub);margin-top:4px}
   #present .dist-avg{color:#C8D8EA;font-size:clamp(13px,1.4vw,17px)}
+  /* 발표자 스포트라이트 */
+  .p-ans{cursor:pointer}
+  .p-ans:hover{border-color:rgba(62,231,149,.5)}
+  .p-spot{position:absolute;inset:0;background:rgba(4,12,22,.9);display:none;align-items:center;justify-content:center;z-index:5;padding:4vh 5vw}
+  .p-spot.show{display:flex}
+  .p-spot-card{background:#0E2440;border:2px solid #3EE795;border-radius:18px;padding:4.5vh 3.5vw;max-width:1150px;width:100%;max-height:86vh;overflow-y:auto;box-shadow:0 0 60px rgba(62,231,149,.22);animation:pIn .3s ease}
+  .p-spot-name{font-size:clamp(18px,2.2vw,30px);font-weight:800;color:#7FD0F5;margin-bottom:2vh}
+  .p-spot-name .score-chip{background:rgba(62,231,149,.2);color:#3EE795;font-size:clamp(15px,1.8vw,24px);margin-left:10px}
+  .p-spot-body{font-size:clamp(20px,2.6vw,38px);line-height:1.65;white-space:pre-wrap}
+  .p-spot-bar{display:flex;gap:10px;margin-top:3.5vh}
   /* 커스텀 슬라이드 */
   .cs-center{min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2vh}
   .cs-q{font-size:clamp(18px,2.3vw,34px);font-weight:800;color:#3EE795;word-break:keep-all}
@@ -274,12 +284,23 @@
     <button class="p-btn" onclick="exitPresent()">✕ 종료</button>
   </div>
   <div class="p-body" id="pBody"></div>
+  <div class="p-spot" id="pSpot" onclick="if(event.target===this)closeSpotlight()">
+    <div class="p-spot-card">
+      <div class="p-spot-name" id="pSpotName"></div>
+      <div class="p-spot-body" id="pSpotBody"></div>
+      <div class="p-spot-bar">
+        <button class="p-btn gold" id="pSpotAgain" onclick="pickRandom()">🎲 다시 뽑기</button>
+        <button class="p-btn" onclick="closeSpotlight()">닫기 (ESC)</button>
+      </div>
+    </div>
+  </div>
   <div class="p-bar">
     <button class="p-btn" onclick="pMove(-1)">← 이전</button>
     <button class="p-btn" onclick="pMove(1)">다음 →</button>
     <button class="p-btn gold" id="pStageBtn" onclick="pStage()"></button>
+    <button class="p-btn" id="pPickBtn" onclick="pickRandom()" disabled>🎲 발표자 뽑기</button>
     <button class="p-btn" onclick="pRefresh()">↻ 새로고침</button>
-    <span class="p-keys">←→ 슬라이드 · Enter 단계 진행 · R 새로고침 · ESC 종료</span>
+    <span class="p-keys">←→ 슬라이드 · Enter 단계 진행 · 답변 클릭=확대 · R 새로고침 · ESC 종료</span>
   </div>
 </div>
 
@@ -862,11 +883,13 @@ function exitPresent(){
   refresh(renderAdmin);
 }
 function pKeys(e){
+  var spotOpen = document.getElementById('pSpot').classList.contains('show');
+  if(e.key === 'Escape'){ if(spotOpen){ closeSpotlight(); } else { exitPresent(); } return; }
+  if(spotOpen && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); pickRandom(); return; }
   if(e.key === 'ArrowRight'){ pMove(1); }
   else if(e.key === 'ArrowLeft'){ pMove(-1); }
   else if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pStage(); }
   else if(e.key === 'r' || e.key === 'R'){ pRefresh(); }
-  else if(e.key === 'Escape'){ exitPresent(); }
 }
 function pMove(d){
   pIdx = Math.max(0, Math.min(pSlides.length - 1, pIdx + d));
@@ -892,23 +915,49 @@ function pStage(){
 }
 function pRefresh(){ refresh(function(){ renderSlide(true); }); }
 
+var pAnsList = [], pSpotIdx = -1;
 function pAnswersHtml(q){
   var list = (allAnswers[q.id]||[]).slice().sort(function(a,b){
     return a.cohort === b.cohort ? a.name.localeCompare(b.name) : a.cohort.localeCompare(b.cohort);
   });
+  pAnsList = list;
   var html = '';
   if(q.special === 'score') html += distHtml(list);
   if(!list.length){
     html += '<div style="opacity:.6;font-size:clamp(15px,1.6vw,20px)">아직 작성된 답변이 없습니다</div>';
     return html;
   }
-  html += '<div class="p-cnt-label">학우 답변 ' + list.length + '개</div><div class="p-grid">';
-  list.forEach(function(a){
+  html += '<div class="p-cnt-label">학우 답변 ' + list.length + '개 — 카드를 클릭하면 크게 보입니다</div><div class="p-grid">';
+  list.forEach(function(a, i){
     var chip = (q.special === 'score' && a.score !== '' && a.score != null) ? '<span class="score-chip">' + esc(a.score) + '점</span> ' : '';
-    html += '<div class="p-ans"><div class="meta">' + esc(a.name) + ' · ' + esc(a.cohort) + '</div><div class="body">' + chip + esc(a.text) + '</div></div>';
+    html += '<div class="p-ans" onclick="pSpotlight(' + i + ')"><div class="meta">' + esc(a.name) + ' · ' + esc(a.cohort) + '</div><div class="body">' + chip + esc(a.text) + '</div></div>';
   });
   html += '</div>';
   return html;
+}
+/* 답변 스포트라이트 (확대 표시) + 발표자 랜덤 뽑기 */
+function pSpotlight(i){
+  var a = pAnsList[i];
+  if(!a) return;
+  pSpotIdx = i;
+  var s = pSlides[pIdx];
+  var chip = (s && s.t==='q' && s.q.special==='score' && a.score !== '' && a.score != null) ? '<span class="score-chip">' + esc(a.score) + '점</span>' : '';
+  $('pSpotName').innerHTML = '🎤 ' + esc(a.name) + ' · ' + esc(a.cohort) + chip;
+  $('pSpotBody').textContent = a.text;
+  $('pSpotAgain').style.display = pAnsList.length > 1 ? '' : 'none';
+  $('pSpot').classList.add('show');
+}
+function pickRandom(){
+  if(!pAnsList.length){ toast('아직 답변이 없습니다'); return; }
+  var i = 0;
+  if(pAnsList.length > 1){
+    do { i = Math.floor(Math.random() * pAnsList.length); } while(i === pSpotIdx);
+  }
+  pSpotlight(i);
+}
+function closeSpotlight(){
+  $('pSpot').classList.remove('show');
+  pSpotIdx = -1;
 }
 function pCeoHtml(q){
   var c = ceoOf(q);
@@ -923,6 +972,9 @@ function renderSlide(keepScroll){
   var prevScroll = keepScroll ? body.scrollTop : 0;
   document.getElementById('pCount').textContent = (pIdx + 1) + ' / ' + pSlides.length;
   st.disabled = false;
+  if(!keepScroll) closeSpotlight();
+  pAnsList = [];
+  document.getElementById('pPickBtn').disabled = true;
   if(s.t === 'title'){
     body.innerHTML = '<div class="p-center"><div class="p-title"><span class="accent">AX</span> 그리고 <span class="accent">리더</span></div><div class="p-sub">인공지능(AI)이 만들어낸 혁신의 시대,<br>에듀플렉스 비즈니스의 AI전환 과정을 이끌어갈 리더는 무엇을 해야 하는가?</div><div class="p-sub" style="opacity:.6">EDUSQUARE 경영포럼 2026 · 고승재 대표님 인터뷰</div></div>';
     st.textContent = '시작 →';
@@ -954,6 +1006,7 @@ function renderSlide(keepScroll){
     if(showAns) html += pAnswersHtml(q);
     if(showCeo) html += pCeoHtml(q);
     body.innerHTML = html;
+    document.getElementById('pPickBtn').disabled = !(showAns && pAnsList.length > 0);
     // 대표님 답변이 마지막에 공개되므로, 공개 순간 해당 카드가 보이도록 스크롤
     if(showCeo && !keepScroll){ var pc = body.querySelector('.p-ceo'); if(pc) pc.scrollIntoView({block:'end'}); return; }
     if(pStageN >= max){ st.textContent = '다음 질문 →'; }
