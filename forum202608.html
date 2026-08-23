@@ -359,7 +359,7 @@
   <div class="p-top">
     <span id="pCount"></span>
     <span><span class="lg-edu">EDU</span>SQUARE 경영포럼 2026 — AX 그리고 리더</span>
-    <button class="p-btn" onclick="exitPresent()">✕ 종료</button>
+    <button class="p-btn" id="axBtn" onclick="axHome()" title="첫 페이지로 — 첫 페이지에서 누르면 보던 페이지로 복귀" style="font-weight:800;color:#3EE795;border-color:rgba(62,231,149,.6)">AX</button>
   </div>
   <div class="p-body" id="pBody"></div>
   <div class="p-spot" id="pSpot" onclick="if(event.target===this)closeSpotlight()">
@@ -1190,6 +1190,18 @@ function pMove(d){
   pIdx = Math.max(0, Math.min(pSlides.length - 1, pIdx + d));
   pStageN = 0;
   renderSlide();
+}
+/* AX 버튼: 첫 페이지 ↔ 최근 재생 페이지 토글 */
+var axReturn = null;
+function axHome(){
+  if(pIdx !== 0){
+    axReturn = { idx: pIdx, stage: pStageN };
+    pIdx = 0; pStageN = 0;
+    renderSlide();
+  } else if(axReturn){
+    pIdx = axReturn.idx; pStageN = axReturn.stage;
+    renderSlide();
+  }
 }
 function pMaxStage(q){
   if(kindOf(q) === 'ceo') return 1;    // 질문 → 대표님 답변
