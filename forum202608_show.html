@@ -106,6 +106,32 @@
   .note{font-size:12.5px;color:#B9CBDC;background:rgba(79,169,232,.1);border:1px solid rgba(79,169,232,.2);border-radius:10px;padding:10px 13px;margin-bottom:14px}
   .demo-banner{background:#3A2E10;color:#F5C169;font-size:12px;text-align:center;padding:6px;position:relative;z-index:1}
   .hidden{display:none!important}
+  /* ===== PDF/인쇄용 (모두의 답 페이지) ===== */
+  @media print{
+    body{background:#fff!important;color:#000!important;padding:0}
+    body::before,.tabs,.demo-banner,.msg,#pdfBtn,.sync-banner,.nav-guard{display:none!important}
+    .wrap{max-width:100%;padding:0 4px}
+    header{background:none;color:#000;border-bottom:2px solid #000}
+    header .sub{color:#333}
+    header .sub b{color:#0A7D4F}
+    header .who{background:#eee;color:#000}
+    header h1 .lg-edu{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#1E6FD9}
+    header h1 .lg-sq{color:#555}
+    .card{background:#fff;border:1px solid #999;break-inside:avoid;backdrop-filter:none}
+    .q-full,.board-title,.ans .body,.ceo-card .body{color:#000}
+    .sec-title{color:#0A7D4F}
+    .hint,.empty,.dist-avg,.ans .meta .co{color:#555}
+    .note{background:#f4f4f4;border-color:#ccc;color:#333}
+    .ans{border-top:1px solid #ddd}
+    .ans .meta{color:#1E5FA8}
+    .ans .score-chip,.badge{background:#eee!important;color:#000!important}
+    .ceo-card{border-color:#0A7D4F;box-shadow:none}
+    .ceo-card .head{background:#E8F6EF;color:#0A7D4F}
+    .ceo-card .body{background:#fff}
+    .dist-row .lab,.dist-row .cnt{color:#333}
+    .dist-row .track{background:#eee}
+    .dist-row .fill{background:#0A7D4F}
+  }
   .loading{text-align:center;color:var(--sub);padding:30px 0;font-size:14px}
   .empty{color:var(--sub);font-size:13px;padding:10px 2px}
   /* ===== 발표 모드 (프로젝터용) ===== */
@@ -243,6 +269,7 @@
   <!-- 모두의 답 -->
   <div id="viewBrowse" class="hidden">
     <div class="note">학우들의 답변과, 공개된 대표님 답변을 볼 수 있습니다. 🔒 표시는 포럼 현장에서 인터뷰 진행에 맞춰 하나씩 공개됩니다.</div>
+    <button class="btn ghost sm" id="pdfBtn" onclick="window.print()" style="margin-bottom:14px">📄 PDF로 저장 (인쇄)</button>
     <div id="browseList"></div>
   </div>
 
@@ -317,6 +344,17 @@
     <button class="p-btn" id="pPickBtn" onclick="pickRandom()" disabled>🎲 발표자 뽑기</button>
     <button class="p-btn" onclick="pRefresh()">↻ 새로고침</button>
     <span class="p-keys">←→ 슬라이드 · Enter 단계 진행 · 답변 클릭=확대 · R 새로고침 · ESC 종료</span>
+  </div>
+</div>
+
+<!-- 전체 응답 완료 감사 화면 -->
+<div class="nav-guard hidden" id="doneOverlay">
+  <div class="card" style="text-align:center">
+    <div style="font-size:40px;margin-bottom:6px">🎉</div>
+    <div class="q-full" style="font-size:17px">응답해 주시고, 경청해 주셔서 감사합니다.</div>
+    <div class="hint" style="margin-top:6px">모든 질문에 답변을 완료하셨습니다.<br>학우들과 대표님의 답변이 모인 페이지를 확인해 보세요.</div>
+    <button class="btn" onclick="location.href=PAGE_FILES.board">📋 모두의 답변 보기</button>
+    <button class="btn ghost" onclick="document.getElementById('doneOverlay').classList.add('hidden')">닫기</button>
   </div>
 </div>
 
@@ -535,6 +573,7 @@ function isDirty(){
 }
 /* 미저장 이동 가드 */
 var pendingNav = null;
+var doneShown = false;   // 전체 응답 완료 감사 화면 표시 여부
 function guardNav(fn){
   var detailOn = !$('viewDetail').classList.contains('hidden');
   if(detailOn && curQ && isDirty()){
@@ -720,6 +759,11 @@ function saveAnswer(cb){
     $('saveBtn').textContent = '수정하여 저장하기';
     toast('저장되었습니다 ✅ 아래에서 실시간 보드를 확인하세요');
     refresh(function(){ renderBoard(); updateSyncBanner(); });
+    // 전체 응답 완료 시 감사 화면 (1회)
+    if(!doneShown && answerableQs().every(function(q){ return myAnswers[q.id]; })){
+      doneShown = true;
+      setTimeout(function(){ $('doneOverlay').classList.remove('hidden'); }, 700);
+    }
     if(cb) cb();
   });
 }
